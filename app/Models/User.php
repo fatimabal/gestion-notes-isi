@@ -1,32 +1,57 @@
 <?php
 
 namespace App\Models;
-
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Etudiant;
+use App\Models\Enseignant;
+use App\Models\Scolarite;
+use App\Models\ParentEtudiant;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
+// #[Fillable(['name', 'email', 'password'])]
+// #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $fillable = [
+        'nom','prenom','email','password','role','telephone',
+       
+    ];
+
+    protected $hidden = [
+        'password','remember_token'
+    ];
+
+    public function isScolarite():bool {
+        return $this->role==='scolarite';
+        }
+    public function isEtudiant():bool {
+        return $this->role==='etudiant';
+        }
+    public function isEnseignant():bool {
+        return $this->role==='enseignant';
+        }
+    public function isParent():bool {
+        return $this->role==='parent';
+        }
+
+    public function etudiant()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasOne(Etudiant::class);
+    }
+   
+    public function enseignant()
+    {
+        return $this->hasOne(Enseignant::class);
+    }
+    public function scolarite()
+    {
+        return $this->hasOne(Scolarite::class);
+    }
+    public function parentEtudiant()
+    {
+        return $this->hasOne(ParentEtudiant::class);
     }
 }
