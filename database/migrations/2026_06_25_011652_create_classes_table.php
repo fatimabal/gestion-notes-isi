@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
+            $table->string('nomClasse');
+            $table->string('niveau');
+            $table->string('anneeAcademique');
             $table->timestamps();
         });
     }

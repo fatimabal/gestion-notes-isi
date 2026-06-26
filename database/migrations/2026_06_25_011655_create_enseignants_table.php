@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('enseignants', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+             $table->string('specialite'); 
+             $table->string('grade'); 
+            $table->foreignId('user_id')->constrained('users');
+             $table->timestamps();
+
         });
     }
 

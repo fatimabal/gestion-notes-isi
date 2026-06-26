@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('scolarites', function (Blueprint $table) {
             $table->id();
+            $table->string('fonction'); 
+            $table->string('bureau'); 
+            $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
         });
     }
