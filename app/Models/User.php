@@ -8,12 +8,13 @@ use App\Models\Etudiant;
 use App\Models\Enseignant;
 use App\Models\Scolarite;
 use App\Models\ParentEtudiant;
+use Laravel\Sanctum\HasApiTokens;
 
 // #[Fillable(['name', 'email', 'password'])]
 // #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens,HasFactory, Notifiable;
 
     protected $fillable = [
         'nom','prenom','email','password','role','telephone',
