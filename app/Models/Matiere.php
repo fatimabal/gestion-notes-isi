@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Classe;
 class Matiere extends Model
 {
-    protected $table='matiere';
     protected $fillable = [
         'libelle','credits','volumeHoraire','coefficient'
     ];

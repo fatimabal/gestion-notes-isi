@@ -7,7 +7,6 @@ use App\Models\Etudiant;
 use App\Models\Matiere;
 class Classe extends Model
 {
-    protected $table='classe';
     protected $fillable = [
     'nomClasse','niveau','anneeAcademique'
     ];
