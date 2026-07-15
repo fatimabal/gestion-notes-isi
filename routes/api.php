@@ -8,6 +8,7 @@ use App\Http\Controllers\SemestreController;
 use App\Http\Controllers\ClasseController;
 use App\Http\Controllers\MatiereController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\NoteController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -21,13 +22,16 @@ Route::post('/logout', [AuthController::class, 'logout'])
 // Groupe enseignant
 Route::middleware(['auth:sanctum','check.role:enseignant'])
 ->group(function(){
-    // Sprint 3
+    Route::post('/notes',[NoteController::class,'store']);
+    Route::put('/notes/{id}',[NoteController::class,'update']);
 });
+
 
 // Groupe etudiant
 Route::middleware(['auth:sanctum','check.role:etudiant'])
 ->group(function(){
-    // Sprint 3
+    Route::get('/notes',[NoteController::class,'index']);
+    Route::post('/notes/{id}/reclamer',[NoteController::class,'reclamer']);
 });
 
 // Groupe scolarite
@@ -41,6 +45,7 @@ Route::middleware(['auth:sanctum','check.role:scolarite'])
     Route::post('/semestres',[SemestreController::class,'store']);
     Route::get('/evaluations',[EvaluationController::class,'index']);
     Route::post('/evaluations',[EvaluationController::class,'store']);
+    Route::put('/notes/{id}/valider',[NoteController::class,'valider']);
 });
 
 // Groupe tous les rôles connectés
