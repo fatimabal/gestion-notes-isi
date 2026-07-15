@@ -85,5 +85,25 @@ $notes = Note::where('etudiant_id', $etudiant->id)->get();
         
     ], 200);
 }
+//reclamer une note
+public function reclamer(Request $request, $id)
+{
+    $note = Note::find($id);
+    
+    if(!$note){
+        return response()->json(['message' => 'Note non trouvée'], 404);
+    }
+
+    $request->validate([
+        'reclamation' => 'required|string'
+    ]);
+
+    $note->update(['reclamation' => $request->reclamation]);
+
+    return response()->json([
+        'message' => 'Réclamation soumise avec succès',
+        'note' => $note
+    ], 200);
+}
 
 }

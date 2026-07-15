@@ -16,7 +16,8 @@ class Note extends Model
         'etudiant_id','enseignant_id',
         'matiere_id','evaluation_id',
         'semestre_id',
-        'validee'
+        'validee',
+        'reclamation'
 
     ];
     public function etudiant(){
