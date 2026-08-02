@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('inscriptions', function (Blueprint $table) {
             $table->id();
-            $table->string('anneAcademique');
+            $table->string('anneeAcademique');
             $table->date('dateInscription');
             $table->integer('Groupe');
             $table->foreignId('etudiant_id')->constrained('etudiants');
