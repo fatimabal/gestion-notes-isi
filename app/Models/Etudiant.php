@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-use App\Models\Classe;
 use App\Models\ParentEtudiant;
+use App\Models\Inscription; 
 class Etudiant extends Model
 {
      protected $fillable = [
@@ -15,8 +15,8 @@ class Etudiant extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
-    public function classe(){
-        return $this->belongsTo(Classe::class);
+    public function inscription(){
+        return $this->hasMany(Inscription::class);
 
     }
     public function parentEtudiant(){
