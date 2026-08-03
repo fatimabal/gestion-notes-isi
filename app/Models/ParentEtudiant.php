@@ -8,6 +8,11 @@ use App\Models\Etudiant;
 class ParentEtudiant extends Model
 {
      protected $fillable = [
+     'profession',
+     'adresse', 
+     'lienParente',
+     'user_id',
+     'etudiant_id'
     ];
      public function user(){
         return $this->belongsTo(User::class);
