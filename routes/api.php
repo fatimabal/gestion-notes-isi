@@ -9,6 +9,9 @@ use App\Http\Controllers\ClasseController;
 use App\Http\Controllers\MatiereController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\BulletinController;
+use App\Http\Controllers\InscriptionController;
+use App\Http\Controllers\HistoriqueModificationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -26,12 +29,12 @@ Route::middleware(['auth:sanctum','check.role:enseignant'])
     Route::put('/notes/{id}',[NoteController::class,'update']);
 });
 
-
 // Groupe etudiant
 Route::middleware(['auth:sanctum','check.role:etudiant'])
 ->group(function(){
     Route::get('/notes',[NoteController::class,'index']);
     Route::post('/notes/{id}/reclamer',[NoteController::class,'reclamer']);
+    Route::get('/bulletins',[BulletinController::class,'consulter']);
 });
 
 // Groupe scolarite
@@ -46,6 +49,10 @@ Route::middleware(['auth:sanctum','check.role:scolarite'])
     Route::get('/evaluations',[EvaluationController::class,'index']);
     Route::post('/evaluations',[EvaluationController::class,'store']);
     Route::put('/notes/{id}/valider',[NoteController::class,'valider']);
+    Route::post('/bulletins',[BulletinController::class,'generer']);
+    Route::get('/historique',[HistoriqueModificationController::class,'index']);
+    Route::post('/inscriptions',[InscriptionController::class,'store']);
+    Route::get('/inscriptions',[InscriptionController::class,'index']);
 });
 
 // Groupe tous les rôles connectés
