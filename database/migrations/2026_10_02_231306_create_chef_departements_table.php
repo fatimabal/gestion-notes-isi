@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('chef_departements', function (Blueprint $table) {
             $table->id();
+            $table->string('mandat');
+            $table->date('dateDebut');
+            $table->date('dateFin');
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('departement_id')->constrained('departements');
             $table->timestamps();
         });
     }

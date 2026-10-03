@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-            Schema::rename('scolarites', 'agent_service_examens');
-        
+        Schema::table('evaluations', function (Blueprint $table) {
+            $table->foreignId('module_id')->nullable()->constrained('modules');
+        });
     }
 
     /**
@@ -20,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-            // Dans down() : revenir en arrière
-            Schema::rename('agent_service_examens', 'scolarites');
-        
+        Schema::table('evaluations', function (Blueprint $table) {
+            $table->dropForeign(['module_id']);
+            $table->dropColumn('module_id');
+        });
     }
 };

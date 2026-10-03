@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('reclamations', function (Blueprint $table) {
             $table->id();
+            $table->date('dateCreation');
+            $table->string('motif');
+            $table->string('statut');
+            $table->foreignId('etudiant_id')->constrained('etudiants');
+            $table->foreignId('note_id')->constrained('notes');
             $table->timestamps();
         });
     }

@@ -10,18 +10,16 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-            Schema::rename('scolarites', 'agent_service_examens');
-        
-    }
+{
+    Schema::rename('matieres', 'modules');
+}
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-            // Dans down() : revenir en arrière
-            Schema::rename('agent_service_examens', 'scolarites');
-        
+            Schema::rename('modules', 'matieres');
+
     }
 };
