@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('modules', function (Blueprint $table) {
+        $table->dropForeign('matieres_classe_id_foreign');
+        $table->dropColumn('classe_id');
+    });
+
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('modules', function (Blueprint $table) {
+        $table->foreignId('classe_id')->nullable()->constrained('classes');
+    });
+    }
+};

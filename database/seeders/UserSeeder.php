@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Etudiant;
 use App\Models\Enseignant;
-use App\Models\Scolarite;
+use App\Models\AgentServiceExamen;
 use App\Models\Inscription;
 use Illuminate\Support\Facades\Hash;
 
@@ -25,12 +25,12 @@ class UserSeeder extends Seeder
             'telephone' => '779081356',
         ]);
         Etudiant::create([
-    'user_id' => $etudiant_user->id,
-    'matricule' => 'ETU001',
-    'dateNaissance' => '2003-11-22',
-    'lieuNaissance' => 'Dakar',
-    'filiere' => 'Génie Logiciel',
-]);
+            'user_id' => $etudiant_user->id,
+            'matricule' => 'ETU001',
+            'dateNaissance' => '2003-11-22',
+            'lieuNaissance' => 'Dakar',
+            'filiere' => 'Génie Logiciel',
+        ]);
 
         // Créer l'enseignant
         $enseignant_user = User::create([
@@ -56,10 +56,10 @@ class UserSeeder extends Seeder
             'role' => 'scolarite',
             'telephone' => '767891221',
         ]);
-        Scolarite::create([
+        AgentServiceExamen::create([
             'user_id' => $scolarite_user->id,
             'fonction' => 'Responsable Scolarité',
-            'bureau' => 'Bureau 1'
+            'bureau' => 'examens'
         ]);
 
         // Créer le parent
@@ -72,12 +72,12 @@ class UserSeeder extends Seeder
             'telephone' => '781023456',
         ]);
 
-    Inscription::create([
-    'etudiant_id' => 1,
-    'classe_id' => 1,
-    'anneeAcademique' => '2025/2026',
-    'dateInscription' => '2025-10-01',
-    'Groupe' => 1
-]);
+        Inscription::create([
+            'etudiant_id' => 1,
+            'classe_id' => 1,
+            'anneeAcademique' => '2025/2026',
+            'dateInscription' => '2025-10-01',
+            'Groupe' => 1
+        ]);
     }
 }
