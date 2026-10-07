@@ -8,14 +8,22 @@ use App\Models\User;
 use App\Models\Etudiant;
 use App\Models\Enseignant;
 use App\Models\AgentServiceExamen;
+use App\Models\ParentEtudiant;
+use App\Models\Comptable;
+use App\Models\ChefDepartement;
 use App\Models\Inscription;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Departement;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Créer l'étudiant
+        // Créer un département d'abord
+        Departement::create([
+            'nom' => 'Département Informatique'
+        ]);
+        // Etudiant
         $etudiant_user = User::create([
             'nom' => 'Diop',
             'prenom' => 'Makhou',
@@ -32,7 +40,7 @@ class UserSeeder extends Seeder
             'filiere' => 'Génie Logiciel',
         ]);
 
-        // Créer l'enseignant
+        // Enseignant
         $enseignant_user = User::create([
             'nom' => 'Diop',
             'prenom' => 'Elhadji Mar',
@@ -47,7 +55,7 @@ class UserSeeder extends Seeder
             'grade' => 'Docteur'
         ]);
 
-        // Créer la scolarité
+        // Scolarité
         $scolarite_user = User::create([
             'nom' => 'Thiam',
             'prenom' => 'Anta',
@@ -62,7 +70,7 @@ class UserSeeder extends Seeder
             'bureau' => 'examens'
         ]);
 
-        // Créer le parent
+        // Parent
         User::create([
             'nom' => 'Bal',
             'prenom' => 'Mohamed',
@@ -72,6 +80,47 @@ class UserSeeder extends Seeder
             'telephone' => '781023456',
         ]);
 
+        // Comptable
+        $comptable_user = User::create([
+            'nom' => 'Ndiaye',
+            'prenom' => 'Ibrahima',
+            'email' => 'comptable@test.com',
+            'password' => Hash::make('123456'),
+            'role' => 'comptable',
+            'telephone' => '771122334',
+        ]);
+        Comptable::create([
+            'user_id' => $comptable_user->id,
+        ]);
+
+        // Chef Département
+        $chef_user = User::create([
+            'nom' => 'Fall',
+            'prenom' => 'Mamadou',
+            'email' => 'chef@test.com',
+            'password' => Hash::make('123456'),
+            'role' => 'chef_departement',
+            'telephone' => '772233445',
+        ]);
+        ChefDepartement::create([
+            'user_id' => $chef_user->id,
+            'mandat' => '2024-2026',
+            'dateDebut' => '2024-01-01',
+            'dateFin' => '2026-12-31',
+            'departement_id' => 1
+        ]);
+
+        // Admin
+        User::create([
+            'nom' => 'Admin',
+            'prenom' => 'Système',
+            'email' => 'admin@test.com',
+            'password' => Hash::make('123456'),
+            'role' => 'admin',
+            'telephone' => '773344556',
+        ]);
+
+        // Inscription étudiant
         Inscription::create([
             'etudiant_id' => 1,
             'classe_id' => 1,
