@@ -39,7 +39,22 @@ class NoteController extends Controller
             'note' => $note
         ], 201);
     }
+    // Pour le parent
+    public function notesEnfant(Request $request)
+    {
+        $parent = $request->user()->parentEtudiant;
+        $notes = Note::where('etudiant_id', $parent->etudiant_id)
+            ->where('validee', true)
+            ->get();
+        return response()->json(['notes' => $notes], 200);
+    }
 
+    // Pour le chef département
+    public function toutesLesNotes(Request $request)
+    {
+        $notes = Note::where('validee', true)->get();
+        return response()->json(['notes' => $notes], 200);
+    }
     //modifier une note 
     public function update(Request $request, $id)
     {

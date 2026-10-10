@@ -18,6 +18,7 @@ use App\Http\Controllers\AnneeAcademiqueController;
 use App\Http\Controllers\UeController;
 use App\Http\Controllers\SituationFinanciereController;
 use App\Http\Controllers\ReclamationController;
+use App\Http\Controllers\UserController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -34,6 +35,21 @@ Route::middleware(['auth:sanctum', 'check.role:enseignant'])
         Route::post('/notes', [NoteController::class, 'store']);
         Route::put('/notes/{id}', [NoteController::class, 'update']);
     });
+    // Groupe parent
+Route::middleware(['auth:sanctum', 'check.role:parent'])
+->group(function(){
+    Route::get('/notes/enfant', [NoteController::class, 'notesEnfant']);
+    Route::get('/bulletins/enfant', [BulletinController::class, 'consulterEnfant']);
+});
+
+// Groupe chef_departement
+Route::middleware(['auth:sanctum', 'check.role:chef_departement'])
+->group(function(){
+    Route::get('/notes/toutes', [NoteController::class, 'toutesLesNotes']);
+    Route::get('/classes', [ClasseController::class, 'index']);
+    Route::get('/departements', [DepartementController::class, 'index']);
+    Route::get('/filieres', [FiliereController::class, 'index']);
+});
 
 // Groupe etudiant
 Route::middleware(['auth:sanctum', 'check.role:etudiant'])
@@ -43,7 +59,21 @@ Route::middleware(['auth:sanctum', 'check.role:etudiant'])
         Route::get('/bulletins', [BulletinController::class, 'consulter']);
         Route::post('/reclamations', [ReclamationController::class, 'store']);
     });
+// Groupe Admin
+Route::middleware(['auth:sanctum', 'check.role:admin'])
+->group(function(){
+    Route::get('/utilisateurs', [UserController::class, 'index']);
+    Route::put('/utilisateurs/{id}/bloquer', [UserController::class, 'bloquer']);
+    Route::delete('/utilisateurs/{id}', [UserController::class, 'destroy']);
+    Route::get('/historique', [HistoriqueModificationController::class, 'index']);
+});
 
+// Groupe Comptable
+Route::middleware(['auth:sanctum', 'check.role:comptable'])
+->group(function(){
+    Route::get('/situations-financieres', [SituationFinanciereController::class, 'index']);
+    Route::post('/situations-financieres', [SituationFinanciereController::class, 'store']);
+});
 // Groupe scolarite
 Route::middleware(['auth:sanctum', 'check.role:scolarite'])
     ->group(function () {

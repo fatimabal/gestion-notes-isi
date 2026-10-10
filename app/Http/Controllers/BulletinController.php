@@ -40,4 +40,11 @@ return response()->json([
     $bulletins = Bulletin::where('etudiant_id', $etudiant->id)->get();
     return response()->json(['bulletins' => $bulletins], 200);
 }
+// Pour le parent
+public function consulterEnfant(Request $request)
+{
+    $parent = $request->user()->parentEtudiant;
+    $bulletins = Bulletin::where('etudiant_id', $parent->etudiant_id)->get();
+    return response()->json(['bulletins' => $bulletins], 200);
+}
 }
