@@ -2,27 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Reclamation;
+use App\Notifications\ReclamationRelancee;
+use Illuminate\Http\Request;
+
 
 class ReclamationController extends Controller
 {
-    public function index(){ 
-    return response()->json(['reclamations' => Reclamation::all()], 200); 
-}
-public function store(Request $request){
-    $request->validate([
-        'motif' => 'required|string',
-        'etudiant_id' => 'required|exists:etudiants,id',
-        'note_id' => 'required|exists:notes,id'
-    ]);
+    public function index()
+    {
+        return response()->json(
+            Reclamation::with(['etudiant.user', 'note.evaluation.matiere'])->get()
+        );
+    }
+
+    public function store(Request $request)
+    { $user = auth()->user();
+
     $reclamation = Reclamation::create([
-        'motif' => $request->motif,
-        'statut' => 'en_attente',
-        'dateCreation' => now(),
-        'etudiant_id' => $request->etudiant_id,
-        'note_id' => $request->note_id
+        'etudiant_id' => $user->etudiant->id,
+        'note_id'     => $request->note_id,
+        'motif'       => $request->motif,
+        'statut'      => 'en_attente',
     ]);
-    return response()->json(['reclamation' => $reclamation], 201);
+    return response()->json($reclamation, 201);
+    }
+
+   public function relancer($id)
+{
+    $reclamation = Reclamation::with([
+        'etudiant.user',
+        'note.evaluation.matiere',
+        'note.evaluation.enseignant.user'   // ← correction ici
+    ])->findOrFail($id);
+
+    $reclamation->update(['statut' => 'relancee']);
+
+    $enseignant = $reclamation->note->evaluation->enseignant ?? null;  // ← correction ici
+    if ($enseignant && $enseignant->user) {
+        $enseignant->user->notify(new ReclamationRelancee(
+            matiere: $reclamation->note->evaluation->matiere->nom ?? 'Matière inconnue',
+            etudiantNom: $reclamation->etudiant->user->nom ?? 'Etudiant'
+        ));
+    }
+
+    return response()->json([
+        'message'      => 'Réclamation relancée, enseignant notifié.',
+        'reclamation'  => $reclamation
+    ]);
 }
 }

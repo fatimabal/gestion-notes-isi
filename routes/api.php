@@ -19,7 +19,7 @@ use App\Http\Controllers\UeController;
 use App\Http\Controllers\SituationFinanciereController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\DeliberationController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -35,21 +35,25 @@ Route::middleware(['auth:sanctum', 'check.role:enseignant'])
         Route::post('/notes', [NoteController::class, 'store']);
         Route::put('/notes/{id}', [NoteController::class, 'update']);
     });
-    // Groupe parent
+// Groupe parent
 Route::middleware(['auth:sanctum', 'check.role:parent'])
-->group(function(){
-    Route::get('/notes/enfant', [NoteController::class, 'notesEnfant']);
-    Route::get('/bulletins/enfant', [BulletinController::class, 'consulterEnfant']);
-});
+    ->group(function () {
+        Route::get('/notes/enfant', [NoteController::class, 'notesEnfant']);
+        Route::get('/bulletins/enfant', [BulletinController::class, 'consulterEnfant']);
+    });
 
 // Groupe chef_departement
 Route::middleware(['auth:sanctum', 'check.role:chef_departement'])
-->group(function(){
-    Route::get('/notes/toutes', [NoteController::class, 'toutesLesNotes']);
-    Route::get('/classes', [ClasseController::class, 'index']);
-    Route::get('/departements', [DepartementController::class, 'index']);
-    Route::get('/filieres', [FiliereController::class, 'index']);
-});
+    ->group(function () {
+        Route::get('/notes/toutes', [NoteController::class, 'toutesLesNotes']);
+        Route::get('/classes', [ClasseController::class, 'index']);
+        Route::get('/departements', [DepartementController::class, 'index']);
+        Route::get('/filieres', [FiliereController::class, 'index']);
+        Route::get('/reclamations', [ReclamationController::class, 'index']);
+        Route::put('/reclamations/{id}/relancer', [ReclamationController::class, 'relancer']);
+        Route::get('/deliberations', [DeliberationController::class, 'index']);
+Route::post('/deliberations/valider', [DeliberationController::class, 'valider']);
+    });
 
 // Groupe etudiant
 Route::middleware(['auth:sanctum', 'check.role:etudiant'])
@@ -61,19 +65,19 @@ Route::middleware(['auth:sanctum', 'check.role:etudiant'])
     });
 // Groupe Admin
 Route::middleware(['auth:sanctum', 'check.role:admin'])
-->group(function(){
-    Route::get('/utilisateurs', [UserController::class, 'index']);
-    Route::put('/utilisateurs/{id}/bloquer', [UserController::class, 'bloquer']);
-    Route::delete('/utilisateurs/{id}', [UserController::class, 'destroy']);
-    Route::get('/historique', [HistoriqueModificationController::class, 'index']);
-});
+    ->group(function () {
+        Route::get('/utilisateurs', [UserController::class, 'index']);
+        Route::put('/utilisateurs/{id}/bloquer', [UserController::class, 'bloquer']);
+        Route::delete('/utilisateurs/{id}', [UserController::class, 'destroy']);
+        Route::get('/historique', [HistoriqueModificationController::class, 'index']);
+    });
 
 // Groupe Comptable
 Route::middleware(['auth:sanctum', 'check.role:comptable'])
-->group(function(){
-    Route::get('/situations-financieres', [SituationFinanciereController::class, 'index']);
-    Route::post('/situations-financieres', [SituationFinanciereController::class, 'store']);
-});
+    ->group(function () {
+        Route::get('/situations-financieres', [SituationFinanciereController::class, 'index']);
+        Route::post('/situations-financieres', [SituationFinanciereController::class, 'store']);
+    });
 // Groupe scolarite
 Route::middleware(['auth:sanctum', 'check.role:scolarite'])
     ->group(function () {
@@ -101,6 +105,7 @@ Route::middleware(['auth:sanctum', 'check.role:scolarite'])
         Route::post('/annees-academiques', [AnneeAcademiqueController::class, 'store']);
         Route::get('/ues', [UeController::class, 'index']);
         Route::post('/ues', [UeController::class, 'store']);
+Route::put('/reclamations/{id}/relancer', [ReclamationController::class, 'relancer']);
     });
 
 // Groupe tous les rôles connectés
