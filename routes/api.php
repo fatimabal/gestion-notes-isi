@@ -34,6 +34,7 @@ Route::middleware(['auth:sanctum', 'check.role:enseignant'])
     ->group(function () {
         Route::post('/notes', [NoteController::class, 'store']);
         Route::put('/notes/{id}', [NoteController::class, 'update']);
+        Route::post('/evaluations/{id}/deposer-sujet', [EvaluationController::class, 'deposerSujet']);
     });
 // Groupe parent
 Route::middleware(['auth:sanctum', 'check.role:parent'])

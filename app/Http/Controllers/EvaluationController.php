@@ -8,7 +8,8 @@ use App\Models\Matiere;
 use App\Models\Classe;
 use App\Notifications\ExamenProgramme;
 use Illuminate\Http\Request;
-
+use App\Models\User;
+use App\Notifications\SujetDepose;
 class EvaluationController extends Controller
 {
     public function index(Request $request)
@@ -60,4 +61,28 @@ class EvaluationController extends Controller
 
         return response()->json(['evaluation' => $evaluation], 201);
     }
+    public function deposerSujet($id)
+{
+    $evaluation = Evaluation::with('matiere')->findOrFail($id);
+
+    $enseignant = auth()->user();
+
+    // Notifier scolarite + chef_departement + agent_service_examen
+    $destinataires = User::whereIn('role', [
+        'scolarite',
+        'chef_departement',
+        'agent_service_examen'
+    ])->get();
+
+    foreach ($destinataires as $user) {
+        $user->notify(new SujetDepose(
+            matiere:       $evaluation->matiere->libelle ?? 'Matière',
+            enseignantNom: $enseignant->prenom . ' ' . $enseignant->nom,
+        ));
+    }
+
+    return response()->json([
+        'message' => 'Sujet déposé, les parties concernées ont été notifiées.'
+    ]);
+}
 }
