@@ -9,12 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+   public function up(): void
+{
+    if (!Schema::hasColumn('reclamations', 'statut')) {
         Schema::table('reclamations', function (Blueprint $table) {
-        $table->enum('statut', ['en_attente', 'relancee', 'traitee'])->default('en_attente');
-    });
+            $table->enum('statut', ['en_attente', 'relancee', 'traitee'])->default('en_attente');
+        });
     }
+}
 
     /**
      * Reverse the migrations.

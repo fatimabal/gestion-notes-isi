@@ -7,15 +7,16 @@ use App\Models\Note;
 use App\Models\Bulletin;
 class Semestre extends Model
 {
-    protected $fillable = [
-        'dateDebut','dateFin',
-    ];    
-    //  public function note(){
-    //     return $this->hasMany(Note::class);
+      protected $fillable = ['libelle', 'dateDebut', 'dateFin'];
+  
+        public function ues()
+    {
+        return $this->hasMany(Ue::class);
+    }
 
-    // }
-    //   public function bulletin(){
-    //     return $this->hasMany(Bulletin::class);
+    public function anneeAcademique()
+    {
+        return $this->belongsTo(AnneeAcademique::class);
+    }
 
-    // }
 }

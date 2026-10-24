@@ -71,6 +71,41 @@ Route::middleware(['auth:sanctum', 'check.role:admin'])
         Route::put('/utilisateurs/{id}/bloquer', [UserController::class, 'bloquer']);
         Route::delete('/utilisateurs/{id}', [UserController::class, 'destroy']);
         Route::get('/historique', [HistoriqueModificationController::class, 'index']);
+        // Départements
+Route::get('/departements', [DepartementController::class, 'index']);
+Route::post('/departements', [DepartementController::class, 'store']);
+Route::put('/departements/{id}', [DepartementController::class, 'update']);
+Route::delete('/departements/{id}', [DepartementController::class, 'destroy']);
+
+// Filières
+Route::get('/filieres', [FiliereController::class, 'index']);
+Route::post('/filieres', [FiliereController::class, 'store']);
+Route::put('/filieres/{id}', [FiliereController::class, 'update']);
+Route::delete('/filieres/{id}', [FiliereController::class, 'destroy']);
+
+// Classes
+Route::get('/classes', [ClasseController::class, 'index']);
+Route::post('/classes', [ClasseController::class, 'store']);
+Route::put('/classes/{id}', [ClasseController::class, 'update']);
+Route::delete('/classes/{id}', [ClasseController::class, 'destroy']);
+
+// Modules
+Route::get('/matieres', [MatiereController::class, 'index']);
+Route::post('/matieres', [MatiereController::class, 'store']);
+Route::put('/matieres/{id}', [MatiereController::class, 'update']);
+Route::delete('/matieres/{id}', [MatiereController::class, 'destroy']);
+
+// UE
+Route::get('/ues', [UeController::class, 'index']);
+Route::post('/ues', [UeController::class, 'store']);
+Route::put('/ues/{id}', [UeController::class, 'update']);
+Route::delete('/ues/{id}', [UeController::class, 'destroy']);
+
+// Semestres
+Route::get('/semestres', [SemestreController::class, 'index']);
+Route::post('/semestres', [SemestreController::class, 'store']);
+Route::put('/semestres/{id}', [SemestreController::class, 'update']);
+Route::delete('/semestres/{id}', [SemestreController::class, 'destroy']);
     });
 
 // Groupe Comptable
@@ -113,4 +148,11 @@ Route::put('/reclamations/{id}/relancer', [ReclamationController::class, 'relanc
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
+    Route::get('/notifications', function (Request $request) {
+    return response()->json($request->user()->notifications);
+});
+Route::post('/notifications/lues', function (Request $request) {
+    $request->user()->unreadNotifications->markAsRead();
+    return response()->json(['message' => 'Notifications marquées comme lues']);
+});
 });

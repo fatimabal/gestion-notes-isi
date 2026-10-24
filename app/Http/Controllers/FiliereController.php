@@ -9,16 +9,31 @@ class FiliereController extends Controller
 {
     public function index()
     {
-        return response()->json(['filieres' => Filiere::all()], 200);
+        return response()->json(Filiere::with('departement')->get());
     }
     public function store(Request $request)
     {
         $request->validate([
-            'nom' => 'required|string',
-            'diplome' => 'required|string',
-            'departement_id' => 'required|exists:departements,id'
+            'nom'            => 'required|string',
+            'departement_id' => 'required|exists:departements,id',
         ]);
-        $filiere = Filiere::create($request->all());
-        return response()->json(['filiere' => $filiere], 201);
+        $filiere = Filiere::create($request->only('nom', 'departement_id'));
+        return response()->json($filiere, 201);
     }
+
+    public function destroy($id)
+    {
+        Filiere::findOrFail($id)->delete();
+        return response()->json(['message' => 'Filière supprimée.']);
+    }
+  public function update(Request $request, $id)
+{
+    $filiere = Filiere::findOrFail($id);
+    $request->validate([
+        'nom'            => 'required|string',
+        'departement_id' => 'required|exists:departements,id',
+    ]);
+    $filiere->update($request->only('nom', 'departement_id'));
+    return response()->json($filiere);
+}
 }

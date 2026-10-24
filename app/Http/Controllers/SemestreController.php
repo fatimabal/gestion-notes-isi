@@ -7,27 +7,32 @@ use App\Models\Semestre;
 class SemestreController extends Controller
 {
     public function index(Request $request)
-    {
-        $semestres = Semestre::all();
-return response()->json(['semestres' => $semestres], 200);
+    {        return response()->json(Semestre::all());
+
     }
 
     public function store(Request $request)
     {
-         $request->validate([
-            'dateDebut' => 'required|date',
-            'dateFin' => 'required|date',
-        
+          $request->validate([
+            'libelle' => 'required|string',
         ]);
-        $semestre = Semestre::create([
-    'dateDebut' => $request->dateDebut,
-    'dateFin' => $request->dateFin,
-]);                           
-
-return response()->json([     
-    'semestre' => $semestre
-], 201);   
-
+        $semestre = Semestre::create($request->only('libelle'));
+        return response()->json($semestre, 201);
     
+    }
+    public function update(Request $request, $id)
+    {
+        $semestre = Semestre::findOrFail($id);
+        $request->validate([
+            'libelle' => 'required|string',
+        ]);
+        $semestre->update($request->only('libelle'));
+        return response()->json($semestre);
+    }
+
+    public function destroy($id)
+    {
+        Semestre::findOrFail($id)->delete();
+        return response()->json(['message' => 'Semestre supprimé.']);
     }
 }
