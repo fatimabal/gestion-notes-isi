@@ -4,35 +4,42 @@ namespace App\Http\Controllers;
 
 use App\Models\Classe;
 use Illuminate\Http\Request;
-class ClasseController extends Controller
 
+class ClasseController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $classe = Classe::all();
-return response()->json(['classe' => $classe], 200);
+        return response()->json(Classe::with('filiere')->get());
     }
 
     public function store(Request $request)
     {
-         $request->validate([
+        $request->validate([
             'nomClasse' => 'required|string',
-            'niveau' => 'required|string',
-            'anneeAcademique' => 'required|string',
-        
+            'niveau'    => 'required|string',
+            'filiere_id' => 'required|exists:filieres,id',
         ]);
-        $classe = Classe::create([
-    'nomClasse' => $request->nomClasse,
-    'niveau' => $request->niveau,
-    'anneeAcademique' => $request->anneeAcademique,
-]);                           
 
-return response()->json([     
-    'classe' => $classe
-], 201);   
+        $classe = Classe::create($request->only('nomClasse', 'niveau', 'filiere_id'));
 
-    
+        return response()->json($classe, 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $classe = Classe::findOrFail($id);
+        $request->validate([
+            'nomClasse'  => 'required|string',
+            'niveau'     => 'required|string',
+            'filiere_id' => 'required|exists:filieres,id',
+        ]);
+        $classe->update($request->only('nomClasse', 'niveau', 'filiere_id'));
+        return response()->json($classe);
+    }
+
+    public function destroy($id)
+    {
+        Classe::findOrFail($id)->delete();
+        return response()->json(['message' => 'Classe supprimée.']);
     }
 }
-
-

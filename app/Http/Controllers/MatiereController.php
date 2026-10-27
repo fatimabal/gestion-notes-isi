@@ -12,29 +12,30 @@ class MatiereController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'libelle'     => 'required|string',
-            'credit'      => 'required|integer',
-            'coefficient' => 'required|integer',
-            'ue_id'       => 'required|exists:ues,id',
-        ]);
-        $matiere = Matiere::create($request->only('libelle', 'credit', 'coefficient', 'ue_id'));
-        return response()->json($matiere, 201);
-    }
+{
+    $request->validate([
+        'libelle'     => 'required|string',
+        'credits'     => 'nullable|integer',
+        'coefficient' => 'nullable|integer',
+        'ue_id'       => 'required|exists:ues,id',
+        'volumeHoraire' => 'required|integer',
+    ]);
+$matiere = Matiere::create($request->only('libelle', 'credits', 'coefficient', 'volumeHoraire', 'ue_id'));
+    return response()->json($matiere, 201);
+}
 
     public function update(Request $request, $id)
-    {
-        $matiere = Matiere::findOrFail($id);
-        $request->validate([
-            'libelle'     => 'required|string',
-            'credit'      => 'required|integer',
-            'coefficient' => 'required|integer',
-            'ue_id'       => 'required|exists:ues,id',
-        ]);
-        $matiere->update($request->only('libelle', 'credit', 'coefficient', 'ue_id'));
-        return response()->json($matiere);
-    }
+{
+    $matiere = Matiere::findOrFail($id);
+    $request->validate([
+        'libelle'     => 'required|string',
+        'credits'     => 'nullable|integer',
+        'coefficient' => 'nullable|integer',
+        'ue_id'       => 'required|exists:ues,id',
+    ]);
+    $matiere->update($request->only('libelle', 'credits', 'coefficient', 'ue_id'));
+    return response()->json($matiere);
+}
 
     public function destroy($id)
     {
