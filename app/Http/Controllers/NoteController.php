@@ -50,11 +50,11 @@ class NoteController extends Controller
     }
 
     // Pour le chef département
-    public function toutesLesNotes(Request $request)
-    {
-        $notes = Note::where('validee', true)->get();
-        return response()->json(['notes' => $notes], 200);
-    }
+  public function toutesLesNotes(Request $request)
+{
+$notes = Note::with(['semestre', 'etudiant.user', 'etudiant.inscription.classe', 'evaluation'])->get();
+  return response()->json($notes, 200);
+}
     //modifier une note 
     public function update(Request $request, $id)
     {

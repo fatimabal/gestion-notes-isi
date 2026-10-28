@@ -76,8 +76,8 @@ Route::middleware(['auth:sanctum', 'check.role:parent'])->group(function () {
     Route::get('/bulletins/enfant', [BulletinController::class, 'consulterEnfant']);
 });
 
-// Groupe chef_departement
-Route::middleware(['auth:sanctum', 'check.role:chef_departement'])->group(function () {
+// Groupe chef_departement + agent_service_examen
+Route::middleware(['auth:sanctum', 'check.role:chef_departement,agent_service_examen'])->group(function () {
     Route::get('/notes/toutes', [NoteController::class, 'toutesLesNotes']);
     Route::get('/reclamations', [ReclamationController::class, 'index']);
     Route::put('/reclamations/{id}/relancer', [ReclamationController::class, 'relancer']);
