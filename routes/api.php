@@ -83,6 +83,7 @@ Route::middleware(['auth:sanctum', 'check.role:chef_departement,agent_service_ex
     Route::put('/reclamations/{id}/relancer', [ReclamationController::class, 'relancer']);
     Route::get('/deliberations', [DeliberationController::class, 'index']);
     Route::post('/deliberations/valider', [DeliberationController::class, 'valider']);
+    Route::get('/classes', [ClasseController::class, 'index']);
 });
 
 // Groupe etudiant
@@ -100,7 +101,7 @@ Route::middleware(['auth:sanctum', 'check.role:comptable'])->group(function () {
 });
 
 // Groupe scolarite
-Route::middleware(['auth:sanctum', 'check.role:scolarite'])->group(function () {
+Route::middleware(['auth:sanctum', 'check.role:scolarite,agent_service_examen'])->group(function () {
     Route::get('/evaluations', [EvaluationController::class, 'index']);
     Route::post('/evaluations', [EvaluationController::class, 'store']);
     Route::put('/notes/{id}/valider', [NoteController::class, 'valider']);
@@ -113,6 +114,7 @@ Route::middleware(['auth:sanctum', 'check.role:scolarite'])->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
+    Route::get('/matieres', [MatiereController::class, 'index']);
     Route::get('/notifications', function (Request $request) {
         return response()->json($request->user()->notifications);
     });
