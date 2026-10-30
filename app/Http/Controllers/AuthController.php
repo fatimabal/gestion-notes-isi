@@ -27,6 +27,12 @@ class AuthController extends Controller
             'role' => $request->role,
             'telephone' => $request->telephone
         ]);
+        // Créer le profil lié selon le rôle
+        if ($request->role === 'etudiant') {
+            \App\Models\Etudiant::create(['user_id' => $user->id]);
+        } elseif ($request->role === 'enseignant') {
+            \App\Models\Enseignant::create(['user_id' => $user->id]);
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -49,8 +55,11 @@ class AuthController extends Controller
      $token=$user->createToken('auth_token')->plainTextToken;
     return response()->json([
     'user' => $user,
-    'token' => $token
-],   200);
+    'token' => $token,
+    'nom' => $user->nom,
+    'prenom' => $user->prenom,
+    'role' => $user->role,
+], 200);
  }
  public function logout(Request $request)
  {

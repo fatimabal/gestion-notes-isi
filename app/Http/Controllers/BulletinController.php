@@ -47,4 +47,9 @@ public function consulterEnfant(Request $request)
     $bulletins = Bulletin::where('etudiant_id', $parent->etudiant_id)->get();
     return response()->json(['bulletins' => $bulletins], 200);
 }
+public function index()
+{
+    $bulletins = Bulletin::with(['etudiant.user', 'semestre'])->get();
+    return response()->json($bulletins, 200);
+}
 }

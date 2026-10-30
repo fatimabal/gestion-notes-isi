@@ -9,36 +9,34 @@ class NoteController extends Controller
 {
     //saisir une note
     public function store(Request $request)
-    {
-        $request->validate([
-            'valeur' => 'required|numeric|min:0|max:20',
-            'dateSaisie' => 'required|date',
-            'session' => 'required|string',
-            'etudiant_id' => 'required|exists:etudiants,id',
-            'matiere_id' => 'required|exists:modules,id',
-            'evaluation_id' => 'required|exists:evaluations,id',
-            'semestre_id' => 'required|exists:semestres,id',
+{
+    $request->validate([
+        'valeur'      => 'required|numeric|min:0|max:20',
+        'etudiant_id' => 'required|exists:etudiants,id',
+        'matiere_id'  => 'required|exists:modules,id',
+        'semestre_id' => 'required|exists:semestres,id',
+        'coefficient' => 'nullable|integer|min:1',
+        'type'        => 'nullable|string',
+        'statut'      => 'nullable|string',
+    ]);
 
-        ]);
-        //Recuperer l'enseignant connecter
+    $enseignant = $request->user()->enseignant;
 
-        $enseignant = $request->user()->enseignant;
-        //creer une note
-        $note = Note::create([
-            'valeur' => $request->valeur,
-            'dateSaisie' => $request->dateSaisie,
-            'session' => $request->session,
-            'etudiant_id' => $request->etudiant_id,
-            'enseignant_id' => $enseignant->id,
-            'matiere_id' => $request->matiere_id,
-            'evaluation_id' => $request->evaluation_id,
-            'semestre_id' => $request->semestre_id,
-        ]);
+    $note = Note::create([
+        'valeur'       => $request->valeur,
+        'dateSaisie'   => now(),
+        'session'      => 'normale',
+        'etudiant_id'  => $request->etudiant_id,
+        'enseignant_id'=> $enseignant->id,
+        'matiere_id'   => $request->matiere_id,
+        'semestre_id'  => $request->semestre_id,
+        'coefficient'  => $request->coefficient ?? 1,
+        'type'         => $request->type,
+        'statut'       => $request->statut ?? 'brouillon',
+    ]);
 
-        return response()->json([
-            'note' => $note
-        ], 201);
-    }
+    return response()->json(['note' => $note], 201);
+}
     // Pour le parent
     public function notesEnfant(Request $request)
     {
@@ -86,17 +84,14 @@ $notes = Note::with(['semestre', 'etudiant.user', 'etudiant.inscription.classe',
         ], 200);
     }
     //  Consulter ses notes (Etudiant)
-    public function index(Request $request)
-    {
-        $etudiant = $request->user()->etudiant;
-
-
-        $notes = Note::where('etudiant_id', $etudiant->id)->get();
-        return response()->json([
-            'notes' => $notes
-
-        ], 200);
-    }
+   public function index(Request $request)
+{
+    $etudiant = $request->user()->etudiant;
+    $notes = Note::with(['matiere', 'semestre'])
+        ->where('etudiant_id', $etudiant->id)
+        ->get();
+    return response()->json($notes, 200);
+}
     //reclamer une note
     public function reclamer(Request $request, $id)
     {
@@ -117,4 +112,17 @@ $notes = Note::with(['semestre', 'etudiant.user', 'etudiant.inscription.classe',
             'note' => $note
         ], 200);
     }
+   public function mesNotes(Request $request)
+{
+    $enseignant = $request->user()->enseignant;
+    $notes = Note::with(['matiere', 'etudiant.user', 'semestre'])
+        ->where('enseignant_id', $enseignant->id)
+        ->get();
+    return response()->json($notes);
+}
+public function indexEtudiants(Request $request)
+{
+    $etudiants = \App\Models\Etudiant::with('user')->get();
+    return response()->json($etudiants);
+}
 }
