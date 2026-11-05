@@ -55,4 +55,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(ParentEtudiant::class);
     }
+    public function chefDepartement()
+    {
+         return $this->hasOne(\App\Models\ChefDepartement::class);
+    }
 }
+
+

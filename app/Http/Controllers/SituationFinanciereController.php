@@ -9,8 +9,10 @@ class SituationFinanciereController extends Controller
 {
     public function index()
     {
-        return response()->json(['situations' => SituationFinanciere::all()], 200);
+        $situations = SituationFinanciere::with('etudiant.user')->get();
+        return response()->json($situations, 200);
     }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -19,6 +21,14 @@ class SituationFinanciereController extends Controller
             'etudiant_id' => 'required|exists:etudiants,id'
         ]);
         $situation = SituationFinanciere::create($request->all());
-        return response()->json(['situation' => $situation], 201);
+        return response()->json($situation, 201);
+    }
+
+    public function regulariser($id)
+    {
+        $situation = SituationFinanciere::find($id);
+        if (!$situation) return response()->json(['message' => 'Non trouvé'], 404);
+        $situation->update(['estAJour' => true, 'dateVerification' => now()->toDateString()]);
+        return response()->json($situation, 200);
     }
 }

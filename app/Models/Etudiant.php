@@ -9,8 +9,8 @@ use App\Models\Inscription;
 class Etudiant extends Model
 {
      protected $fillable = [
-        'matricule','dateNaissance','lieuNaissance','filiere',
-    ];
+    'user_id', 'matricule', 'dateNaissance', 'lieuNaissance', 'filiere',
+];
 
     public function user(){
         return $this->belongsTo(User::class);
