@@ -50,14 +50,44 @@ class AuthController extends Controller
         'filiere'       => $request->filiere ?? null,
     ]);
 
-        } elseif ($request->role === 'parent') {
-            \App\Models\ParentEtudiant::create([
-                'user_id'     => $user->id,
-                'telephone'   => $request->telephone ?? null,
-                'profession'  => $request->profession ?? null,
-                'adresse'     => $request->adresse ?? null,
-                'lienParents' => $request->lienParents ?? null,
-            ]);
+     } elseif ($request->role === 'parent') {
+    $parent = \App\Models\ParentEtudiant::create([
+        'user_id'     => $user->id,
+        'telephone'   => $request->telephone ?? null,
+        'profession'  => $request->profession ?? null,
+        'adresse'     => $request->adresse ?? null,
+        'lienParents' => $request->lienParents ?? null,
+    ]);
+\Log::info('etudiantIds reçus:', ['ids' => $request->etudiantIds]);
+if ($request->etudiantIds && is_array($request->etudiantIds)) {
+            $etudiantsValides = [];
+        foreach ($request->etudiantIds as $etudiantId) {
+            $dejaLie = \DB::table('etudiant_parent')
+                ->where('etudiant_id', $etudiantId)
+                ->exists();
+            if (!$dejaLie) {
+                $etudiantsValides[] = $etudiantId;
+            }
+        }
+        if (!empty($etudiantsValides)) {
+            $parent->etudiants()->attach($etudiantsValides);
+        }
+    }
+    if ($request->etudiantIds && is_array($request->etudiantIds)) {
+        // Vérifier que chaque étudiant n'a pas déjà un parent
+        $etudiantsValides = [];
+        foreach ($request->etudiantIds as $etudiantId) {
+            $dejaLie = \DB::table('etudiant_parent')
+                ->where('etudiant_id', $etudiantId)
+                ->exists();
+            if (!$dejaLie) {
+                $etudiantsValides[] = $etudiantId;
+            }
+        }
+        if (!empty($etudiantsValides)) {
+            $parent->etudiants()->attach($etudiantsValides);
+        }
+    }
         } elseif ($request->role === 'chef_departement') {
             \App\Models\ChefDepartement::create([
                 'user_id'    => $user->id,

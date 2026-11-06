@@ -17,7 +17,7 @@ class UeController extends Controller
             'libelle'     => 'required|string',
             'semestre_id' => 'required|exists:semestres,id',
         ]);
-        $ue = Ue::create($request->only('libelle', 'semestre_id'));
+        $ue = Ue::create($request->only('libelle', 'credits', 'semestre_id'));
         return response()->json($ue, 201);
     }
 
@@ -28,7 +28,7 @@ class UeController extends Controller
             'libelle'     => 'required|string',
             'semestre_id' => 'required|exists:semestres,id',
         ]);
-        $ue->update($request->only('libelle', 'semestre_id'));
+        $ue->update($request->only('libelle', 'credits', 'semestre_id'));
         return response()->json($ue);
     }
 

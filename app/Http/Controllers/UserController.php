@@ -14,7 +14,7 @@ class UserController extends Controller
     $users = User::with([
     'enseignant',
     'etudiant.inscription.classe',
-    'parentEtudiant',
+    'parentEtudiant.etudiants.user',
     'chefDepartement',
 ])->get();
     return response()->json($users, 200);
