@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('matieres', function (Blueprint $table) {
             $table->id();
-            $table->string('libelle'); 
-            $table->integer('credits'); 
-            $table->integer('volumeHoraire'); 
-            $table->integer('coefficient'); 
+            $table->string('libelle');
+            $table->integer('credits');
+            $table->integer('volumeHoraire');
+            $table->integer('coefficient');
             $table->foreignId('classe_id')->constrained('classes');
             $table->timestamps();
         });

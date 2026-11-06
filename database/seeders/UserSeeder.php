@@ -2,18 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Etudiant;
-use App\Models\Enseignant;
 use App\Models\AgentServiceExamen;
-use App\Models\ParentEtudiant;
-use App\Models\Comptable;
 use App\Models\ChefDepartement;
-use App\Models\Inscription;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Comptable;
 use App\Models\Departement;
+use App\Models\Enseignant;
+use App\Models\Etudiant;
+use App\Models\Inscription;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -21,7 +19,7 @@ class UserSeeder extends Seeder
     {
         // Créer un département d'abord
         Departement::create([
-            'nom' => 'Département Informatique'
+            'nom' => 'Département Informatique',
         ]);
         // Etudiant
         $etudiant_user = User::create([
@@ -52,7 +50,7 @@ class UserSeeder extends Seeder
         Enseignant::create([
             'user_id' => $enseignant_user->id,
             'specialite' => 'Génie Logiciel',
-            'grade' => 'Docteur'
+            'grade' => 'Docteur',
         ]);
 
         // Scolarité
@@ -67,7 +65,7 @@ class UserSeeder extends Seeder
         AgentServiceExamen::create([
             'user_id' => $scolarite_user->id,
             'fonction' => 'Responsable Scolarité',
-            'bureau' => 'examens'
+            'bureau' => 'examens',
         ]);
 
         // Parent
@@ -107,7 +105,7 @@ class UserSeeder extends Seeder
             'mandat' => '2024-2026',
             'dateDebut' => '2024-01-01',
             'dateFin' => '2026-12-31',
-            'departement_id' => 1
+            'departement_id' => 1,
         ]);
 
         // Admin
@@ -126,7 +124,7 @@ class UserSeeder extends Seeder
             'classe_id' => 1,
             'anneeAcademique' => '2025/2026',
             'dateInscription' => '2025-10-01',
-            'Groupe' => 1
+            'Groupe' => 1,
         ]);
     }
 }

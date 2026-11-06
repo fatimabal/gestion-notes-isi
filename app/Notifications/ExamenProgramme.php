@@ -21,11 +21,11 @@ class ExamenProgramme extends Notification
     public function toDatabase(object $notifiable): array
     {
         return [
-            'message'  => "{$this->type} de {$this->matiere} prévu le {$this->date}",
-            'type'     => $this->type,
-            'matiere'  => $this->matiere,
-            'date'     => $this->date,
-            'classe'   => $this->classe,
+            'message' => "{$this->type} de {$this->matiere} prévu le {$this->date}",
+            'type' => $this->type,
+            'matiere' => $this->matiere,
+            'date' => $this->date,
+            'classe' => $this->classe,
         ];
     }
 }

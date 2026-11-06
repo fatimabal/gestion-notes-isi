@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,8 +10,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-            Schema::rename('scolarites', 'agent_service_examens');
-        
+        Schema::rename('scolarites', 'agent_service_examens');
+
     }
 
     /**
@@ -20,8 +19,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-            // Dans down() : revenir en arrière
-            Schema::rename('agent_service_examens', 'scolarites');
-        
+        // Dans down() : revenir en arrière
+        Schema::rename('agent_service_examens', 'scolarites');
+
     }
 };

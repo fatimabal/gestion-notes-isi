@@ -20,7 +20,7 @@ class SujetDepose extends Notification
     {
         return [
             'message' => "L'enseignant {$this->enseignantNom} a déposé le sujet de {$this->matiere}",
-            'type'    => 'sujet_depose',
+            'type' => 'sujet_depose',
             'matiere' => $this->matiere,
         ];
     }

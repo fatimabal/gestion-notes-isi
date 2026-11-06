@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Matiere;
+use Illuminate\Database\Seeder;
 
 class MatiereSeeder extends Seeder
 {
@@ -14,22 +13,22 @@ class MatiereSeeder extends Seeder
     public function run(): void
     {
         Matiere::create([
-            'libelle'=>'Algorithmique',
-            'credits'=>3,
-            'volumeHoraire'=>30,
-            'coefficient'=>2,
+            'libelle' => 'Algorithmique',
+            'credits' => 3,
+            'volumeHoraire' => 30,
+            'coefficient' => 2,
         ]);
         Matiere::create([
-            'libelle'=>'Java',
-            'credits'=>4,
-            'volumeHoraire'=>30,
-            'coefficient'=>3,
+            'libelle' => 'Java',
+            'credits' => 4,
+            'volumeHoraire' => 30,
+            'coefficient' => 3,
         ]);
         Matiere::create([
-            'libelle'=>'Design',
-            'credits'=>3,
-            'volumeHoraire'=>24,
-            'coefficient'=>1,
+            'libelle' => 'Design',
+            'credits' => 3,
+            'volumeHoraire' => 24,
+            'coefficient' => 1,
         ]);
     }
 }

@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('deliberations', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('classe_id')->constrained('classes');
-        $table->foreignId('semestre_id')->constrained('semestres');
-        $table->foreignId('validee_par')->constrained('users');
-        $table->enum('statut', ['en_attente', 'validee'])->default('en_attente');
-        $table->timestamp('date_validation')->nullable();
-        $table->timestamps();
-    });
+            $table->id();
+            $table->foreignId('classe_id')->constrained('classes');
+            $table->foreignId('semestre_id')->constrained('semestres');
+            $table->foreignId('validee_par')->constrained('users');
+            $table->enum('statut', ['en_attente', 'validee'])->default('en_attente');
+            $table->timestamp('date_validation')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**

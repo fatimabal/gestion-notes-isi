@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Enseignant;
-use App\Models\Scolarite;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,7 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('telephone');
-            $table->enum ('role',['etudiant','enseignant','scolarite','parent']);
+            $table->enum('role', ['etudiant', 'enseignant', 'scolarite', 'parent']);
             $table->rememberToken();
             $table->timestamps();
         });

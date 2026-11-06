@@ -10,13 +10,14 @@ class CheckRole
 {
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if (!$request->user() || !in_array($request->user()->role, $roles)) {
+        if (! $request->user() || ! in_array($request->user()->role, $roles)) {
             return response()->json([
                 'message' => 'Accès refusé',
                 'user' => $request->user(),
-                'roles_attendus' => $roles
+                'roles_attendus' => $roles,
             ], 403);
         }
+
         return $next($request);
     }
 }

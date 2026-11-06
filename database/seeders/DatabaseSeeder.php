@@ -20,6 +20,6 @@ class DatabaseSeeder extends Seeder
             MatiereSeeder::class,
             UserSeeder::class,
         ]);
-        
+
     }
 }

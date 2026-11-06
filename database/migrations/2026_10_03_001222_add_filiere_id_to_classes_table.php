@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('classes', function (Blueprint $table) {
-        $table->integer('effectif')->default(0);
-        $table->foreignId('filiere_id')->nullable()->constrained('filieres');
-    });
+            $table->integer('effectif')->default(0);
+            $table->foreignId('filiere_id')->nullable()->constrained('filieres');
+        });
     }
 
     /**
@@ -22,10 +22,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-       Schema::table('classes', function (Blueprint $table) {
-        $table->dropColumn('effectif');
-        $table->dropForeign(['filiere_id']);
-        $table->dropColumn('filiere_id');
-    });
+        Schema::table('classes', function (Blueprint $table) {
+            $table->dropColumn('effectif');
+            $table->dropForeign(['filiere_id']);
+            $table->dropColumn('filiere_id');
+        });
     }
 };

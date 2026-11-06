@@ -17,22 +17,22 @@ class DeliberationController extends Controller
     public function valider(Request $request)
     {
         $request->validate([
-            'classe_id'   => 'required|exists:classes,id',
+            'classe_id' => 'required|exists:classes,id',
             'semestre_id' => 'required|exists:semestres,id',
         ]);
 
         $deliberation = Deliberation::updateOrCreate(
             ['classe_id' => $request->classe_id, 'semestre_id' => $request->semestre_id],
             [
-                'validee_par'     => auth()->id(),
-                'statut'          => 'validee',
+                'validee_par' => auth()->id(),
+                'statut' => 'validee',
                 'date_validation' => now(),
             ]
         );
 
         return response()->json([
-            'message'       => 'Délibération validée avec succès.',
-            'deliberation'  => $deliberation
+            'message' => 'Délibération validée avec succès.',
+            'deliberation' => $deliberation,
         ]);
     }
 }

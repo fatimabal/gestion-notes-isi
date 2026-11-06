@@ -16,7 +16,7 @@ class ClasseController extends Controller
     {
         $request->validate([
             'nomClasse' => 'required|string',
-            'niveau'    => 'required|string',
+            'niveau' => 'required|string',
             'filiere_id' => 'required|exists:filieres,id',
         ]);
 
@@ -29,17 +29,19 @@ class ClasseController extends Controller
     {
         $classe = Classe::findOrFail($id);
         $request->validate([
-            'nomClasse'  => 'required|string',
-            'niveau'     => 'required|string',
+            'nomClasse' => 'required|string',
+            'niveau' => 'required|string',
             'filiere_id' => 'required|exists:filieres,id',
         ]);
         $classe->update($request->only('nomClasse', 'niveau', 'filiere_id'));
+
         return response()->json($classe);
     }
 
     public function destroy($id)
     {
         Classe::findOrFail($id)->delete();
+
         return response()->json(['message' => 'Classe supprimée.']);
     }
 }

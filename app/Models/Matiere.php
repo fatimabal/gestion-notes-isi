@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+
 class Matiere extends Model
 {
-    protected $table='modules';
-protected $fillable = ['libelle', 'coefficient', 'credits', 'volumeHoraire', 'ue_id'];
-   public function ue()
+    protected $table = 'modules';
+
+    protected $fillable = ['libelle', 'coefficient', 'credits', 'volumeHoraire', 'ue_id'];
+
+    public function ue()
     {
         return $this->belongsTo(Ue::class);
     }
@@ -17,4 +20,8 @@ protected $fillable = ['libelle', 'coefficient', 'credits', 'volumeHoraire', 'ue
         return $this->hasMany(Evaluation::class, 'matiere_id');
     }
 
+    public function enseignants()
+    {
+        return $this->belongsToMany(Enseignant::class, 'enseignant_module', 'module_id', 'enseignant_id');
+    }
 }

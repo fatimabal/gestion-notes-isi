@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Filiere;
+use Illuminate\Http\Request;
 
 class FiliereController extends Controller
 {
@@ -15,11 +15,12 @@ class FiliereController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nom'            => 'required|string',
-            'diplome'        => 'nullable|string',
+            'nom' => 'required|string',
+            'diplome' => 'nullable|string',
             'departement_id' => 'required|exists:departements,id',
         ]);
         $filiere = Filiere::create($request->only('nom', 'diplome', 'departement_id'));
+
         return response()->json($filiere, 201);
     }
 
@@ -27,17 +28,19 @@ class FiliereController extends Controller
     {
         $filiere = Filiere::findOrFail($id);
         $request->validate([
-            'nom'            => 'required|string',
-            'diplome'        => 'nullable|string',
+            'nom' => 'required|string',
+            'diplome' => 'nullable|string',
             'departement_id' => 'required|exists:departements,id',
         ]);
         $filiere->update($request->only('nom', 'diplome', 'departement_id'));
+
         return response()->json($filiere);
     }
 
     public function destroy($id)
     {
         Filiere::findOrFail($id)->delete();
+
         return response()->json(['message' => 'Filière supprimée.']);
     }
 }

@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Matiere;
+
 class Classe extends Model
 {
-     protected $table = 'classes';
+    protected $table = 'classes';
+
     protected $fillable = ['nomClasse', 'niveau', 'effectif', 'filiere_id'];
 
     public function filiere()
@@ -23,5 +24,4 @@ class Classe extends Model
     {
         return $this->hasMany(Evaluation::class);
     }
-   
 }

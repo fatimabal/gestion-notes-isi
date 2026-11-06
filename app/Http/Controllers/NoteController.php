@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Etudiant;
 use App\Models\Note;
+use Illuminate\Http\Request;
 
 class NoteController extends Controller
 {
@@ -11,28 +12,28 @@ class NoteController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'valeur'      => 'required|numeric|min:0|max:20',
+            'valeur' => 'required|numeric|min:0|max:20',
             'etudiant_id' => 'required|exists:etudiants,id',
-            'matiere_id'  => 'required|exists:modules,id',
+            'matiere_id' => 'required|exists:modules,id',
             'semestre_id' => 'required|exists:semestres,id',
             'coefficient' => 'nullable|integer|min:1',
-            'type'        => 'nullable|string',
-            'statut'      => 'nullable|string',
+            'type' => 'nullable|string',
+            'statut' => 'nullable|string',
         ]);
 
         $enseignant = $request->user()->enseignant;
 
         $note = Note::create([
-            'valeur'        => $request->valeur,
-            'dateSaisie'    => now(),
-            'session'       => 'normale',
-            'etudiant_id'   => $request->etudiant_id,
+            'valeur' => $request->valeur,
+            'dateSaisie' => now(),
+            'session' => 'normale',
+            'etudiant_id' => $request->etudiant_id,
             'enseignant_id' => $enseignant->id,
-            'matiere_id'    => $request->matiere_id,
-            'semestre_id'   => $request->semestre_id,
-            'coefficient'   => $request->coefficient ?? 1,
-            'type'          => $request->type,
-            'statut'        => $request->statut ?? 'brouillon',
+            'matiere_id' => $request->matiere_id,
+            'semestre_id' => $request->semestre_id,
+            'coefficient' => $request->coefficient ?? 1,
+            'type' => $request->type,
+            'statut' => $request->statut ?? 'brouillon',
         ]);
 
         return response()->json(['note' => $note], 201);
@@ -45,6 +46,7 @@ class NoteController extends Controller
         $notes = Note::with(['matiere', 'semestre', 'evaluation'])
             ->where('etudiant_id', $etudiant->id)
             ->get();
+
         return response()->json($notes, 200);
     }
 
@@ -55,6 +57,7 @@ class NoteController extends Controller
         $notes = Note::with(['matiere', 'etudiant.user', 'semestre'])
             ->where('enseignant_id', $enseignant->id)
             ->get();
+
         return response()->json($notes);
     }
 
@@ -83,13 +86,14 @@ class NoteController extends Controller
     public function update(Request $request, $id)
     {
         $note = Note::find($id);
-        if (!$note) {
+        if (! $note) {
             return response()->json(['message' => 'Note non trouvée'], 404);
         }
         $request->validate([
             'valeur' => 'required|numeric|min:0|max:20',
         ]);
         $note->update(['valeur' => $request->valeur]);
+
         return response()->json(['note' => $note], 200);
     }
 
@@ -97,10 +101,11 @@ class NoteController extends Controller
     public function valider(Request $request, $id)
     {
         $note = Note::find($id);
-        if (!$note) {
+        if (! $note) {
             return response()->json(['message' => 'Note non trouvée'], 404);
         }
         $note->update(['statut' => 'valide']);
+
         return response()->json(['message' => 'Note validée avec succès', 'note' => $note], 200);
     }
 
@@ -108,20 +113,22 @@ class NoteController extends Controller
     public function reclamer(Request $request, $id)
     {
         $note = Note::find($id);
-        if (!$note) {
+        if (! $note) {
             return response()->json(['message' => 'Note non trouvée'], 404);
         }
         $request->validate([
-            'reclamation' => 'required|string'
+            'reclamation' => 'required|string',
         ]);
         $note->update(['reclamation' => $request->reclamation]);
+
         return response()->json(['message' => 'Réclamation soumise avec succès', 'note' => $note], 200);
     }
 
     // Liste des étudiants (enseignant)
     public function indexEtudiants(Request $request)
     {
-        $etudiants = \App\Models\Etudiant::with('user')->get();
+        $etudiants = Etudiant::with('user')->get();
+
         return response()->json($etudiants);
     }
 
@@ -133,6 +140,7 @@ class NoteController extends Controller
             ->where('etudiant_id', $parent->etudiant_id)
             ->where('statut', 'publie')
             ->get();
+
         return response()->json(['notes' => $notes], 200);
     }
 }

@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\HistoriqueModification;
+use Illuminate\Http\Request;
+
 class HistoriqueModificationController extends Controller
 {
-      public function index(Request $request)
+    public function index(Request $request)
     {
         $historiqueModification = HistoriqueModification::all();
-return response()->json(['historiqueModification' => $historiqueModification], 200);
+
+        return response()->json(['historiqueModification' => $historiqueModification], 200);
     }
 }

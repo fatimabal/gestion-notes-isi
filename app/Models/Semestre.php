@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Note;
-use App\Models\Bulletin;
+
 class Semestre extends Model
 {
-      protected $fillable = ['libelle', 'dateDebut', 'dateFin'];
-  
-        public function ues()
+    protected $fillable = ['libelle', 'dateDebut', 'dateFin'];
+
+    public function ues()
     {
         return $this->hasMany(Ue::class);
     }
@@ -18,5 +17,4 @@ class Semestre extends Model
     {
         return $this->belongsTo(AnneeAcademique::class);
     }
-
 }

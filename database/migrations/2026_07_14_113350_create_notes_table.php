@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('matiere_id')->constrained('matieres');
             $table->foreignId('evaluation_id')->constrained('evaluations');
             $table->foreignId('semestre_id')->constrained('semestres');
- 
+
             $table->timestamps();
         });
     }

@@ -20,7 +20,7 @@ class ReclamationRelancee extends Notification
     {
         return [
             'message' => "Réclamation de {$this->etudiantNom} en {$this->matiere} nécessite votre attention",
-            'type'    => 'reclamation',
+            'type' => 'reclamation',
         ];
     }
 }

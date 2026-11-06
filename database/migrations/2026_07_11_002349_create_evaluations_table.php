@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('evaluations', function (Blueprint $table) {
             $table->id();
-            $table->string('typeEvaluation'); 
-            $table->date('dateEvaluation'); 
-            $table->integer('noteMax'); 
-            $table->integer('noteMin'); 
+            $table->string('typeEvaluation');
+            $table->date('dateEvaluation');
+            $table->integer('noteMax');
+            $table->integer('noteMin');
             $table->integer('coefficient');
             $table->foreignId('matiere_id')->constrained('matieres');
- 
+
             $table->timestamps();
         });
     }

@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('modules', function (Blueprint $table) {
-        $table->dropForeign('matieres_classe_id_foreign');
-        $table->dropColumn('classe_id');
-    });
+            $table->dropForeign('matieres_classe_id_foreign');
+            $table->dropColumn('classe_id');
+        });
 
     }
 
@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('modules', function (Blueprint $table) {
-        $table->foreignId('classe_id')->nullable()->constrained('classes');
-    });
+            $table->foreignId('classe_id')->nullable()->constrained('classes');
+        });
     }
 };

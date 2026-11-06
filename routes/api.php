@@ -1,25 +1,25 @@
 <?php
 
+use App\Http\Controllers\AnneeAcademiqueController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BulletinController;
+use App\Http\Controllers\ClasseController;
+use App\Http\Controllers\DeliberationController;
+use App\Http\Controllers\DepartementController;
+use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\FiliereController;
+use App\Http\Controllers\HistoriqueModificationController;
+use App\Http\Controllers\InscriptionController;
+use App\Http\Controllers\MatiereController;
+use App\Http\Controllers\NoteController;
+use App\Http\Controllers\ReclamationController;
+use App\Http\Controllers\SemestreController;
+use App\Http\Controllers\SituationFinanciereController;
+use App\Http\Controllers\UeController;
+use App\Http\Controllers\UserController;
+use App\Models\Etudiant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SemestreController;
-use App\Http\Controllers\ClasseController;
-use App\Http\Controllers\MatiereController;
-use App\Http\Controllers\EvaluationController;
-use App\Http\Controllers\NoteController;
-use App\Http\Controllers\BulletinController;
-use App\Http\Controllers\InscriptionController;
-use App\Http\Controllers\HistoriqueModificationController;
-use App\Http\Controllers\DepartementController;
-use App\Http\Controllers\FiliereController;
-use App\Http\Controllers\AnneeAcademiqueController;
-use App\Http\Controllers\UeController;
-use App\Http\Controllers\SituationFinanciereController;
-use App\Http\Controllers\ReclamationController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\DeliberationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/notifications/lues', function (Request $request) {
         $request->user()->unreadNotifications->markAsRead();
+
         return response()->json(['message' => 'Notifications marquées comme lues']);
     });
 });
@@ -55,6 +56,7 @@ Route::middleware(['auth:sanctum', 'check.role:admin'])->group(function () {
     Route::get('/utilisateurs', [UserController::class, 'index']);
     Route::put('/utilisateurs/{id}', [UserController::class, 'update']);
     Route::put('/utilisateurs/{id}/bloquer', [UserController::class, 'bloquer']);
+    Route::put('/utilisateurs/{id}/toggle-actif', [UserController::class, 'toggleActif']);
     Route::delete('/utilisateurs/{id}', [UserController::class, 'destroy']);
     Route::post('/utilisateurs/{id}/reinitialiser-mot-de-passe', [UserController::class, 'reinitialiserMotDePasse']);
 
@@ -73,6 +75,8 @@ Route::middleware(['auth:sanctum', 'check.role:admin'])->group(function () {
     Route::post('/matieres', [MatiereController::class, 'store']);
     Route::put('/matieres/{id}', [MatiereController::class, 'update']);
     Route::delete('/matieres/{id}', [MatiereController::class, 'destroy']);
+    Route::post('/matieres/{id}/affecter-enseignants', [MatiereController::class, 'affecterEnseignants']);
+    Route::get('/enseignants', [UserController::class, 'indexEnseignants']);
 
     Route::post('/ues', [UeController::class, 'store']);
     Route::put('/ues/{id}', [UeController::class, 'update']);
@@ -91,14 +95,13 @@ Route::middleware(['auth:sanctum', 'check.role:admin'])->group(function () {
     Route::get('/journal', [HistoriqueModificationController::class, 'index']);
     Route::delete('/journal', [HistoriqueModificationController::class, 'purger']);
 
-
 });
 
 // ── Groupe Enseignant ──
 Route::middleware(['auth:sanctum', 'check.role:enseignant'])->group(function () {
     Route::get('/notes/mes-notes', [NoteController::class, 'mesNotes']);
     Route::get('/etudiants-liste', function () {
-        return response()->json(\App\Models\Etudiant::with(['user', 'inscription.classe'])->get(), 200);
+        return response()->json(Etudiant::with(['user', 'inscription.classe'])->get(), 200);
     });
     Route::get('/etudiants', [NoteController::class, 'indexEtudiants']);
     Route::post('/notes', [NoteController::class, 'store']);
@@ -152,6 +155,6 @@ Route::middleware(['auth:sanctum', 'check.role:comptable'])->group(function () {
     Route::post('/situations-financieres', [SituationFinanciereController::class, 'store']);
     Route::put('/situations-financieres/{id}/regulariser', [SituationFinanciereController::class, 'regulariser']);
     Route::get('/etudiants-liste', function () {
-        return response()->json(\App\Models\Etudiant::with('user')->get(), 200);
+        return response()->json(Etudiant::with('user')->get(), 200);
     });
 });

@@ -2,36 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Etudiant;
+use App\Models\Inscription;
 use App\Models\User;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+
 class UserController extends Controller
 {
     // Lister tous les utilisateurs
-   public function index()
-{
-    $users = User::with([
-    'enseignant',
-    'etudiant.inscription.classe',
-    'parentEtudiant.etudiants.user',
-    'chefDepartement',
-])->get();
-    return response()->json($users, 200);
-}
+    public function index()
+    {
+        $users = User::with([
+            'enseignant',
+            'etudiant.inscription.classe',
+            'parentEtudiant.etudiants.user',
+            'chefDepartement',
+        ])->get();
+
+        return response()->json($users, 200);
+    }
+
     // Modifier un utilisateur
     public function update(Request $request, $id)
     {
         $user = User::find($id);
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
         $request->validate([
-            'nom'    => 'nullable|string|max:255',
+            'nom' => 'nullable|string|max:255',
             'prenom' => 'nullable|string|max:255',
-            'role'   => 'nullable|string',
+            'role' => 'nullable|string',
         ]);
         $user->update($request->only(['nom', 'prenom', 'role']));
+
         return response()->json($user, 200);
     }
 
@@ -39,10 +44,11 @@ class UserController extends Controller
     public function bloquer($id)
     {
         $user = User::find($id);
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
         $user->update(['bloque' => true]);
+
         return response()->json(['message' => 'Utilisateur bloqué avec succès'], 200);
     }
 
@@ -50,13 +56,14 @@ class UserController extends Controller
     public function reinitialiserMotDePasse($id)
     {
         $user = User::find($id);
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
         $nouveauMotDePasse = 'Password123!';
         $user->update(['password' => bcrypt($nouveauMotDePasse)]);
+
         return response()->json([
-            'message'          => 'Mot de passe réinitialisé',
+            'message' => 'Mot de passe réinitialisé',
             'nouveau_mot_de_passe' => $nouveauMotDePasse,
         ], 200);
     }
@@ -65,80 +72,109 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::find($id);
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
         $user->delete();
+
         return response()->json(['message' => 'Utilisateur supprimé avec succès'], 200);
     }
-    public function indexEtudiants()
-{
-    $etudiants = User::where('role', 'etudiant')->get();
-    return response()->json($etudiants, 200);
-}
-// Voir son profil
-public function profile(Request $request)
-{
-    $user = $request->user();
-    $etudiant = null;
 
-    if ($user->role === 'etudiant') {
-        $etudiant = \App\Models\Etudiant::where('user_id', $user->id)->first();
+    public function indexEtudiants()
+    {
+        $etudiants = User::where('role', 'etudiant')->get();
+
+        return response()->json($etudiants, 200);
     }
 
-    $inscription = \App\Models\Inscription::where('etudiant_id', $etudiant->id)
-    ->with('classe')
-    ->latest()
-    ->first();
+    // Voir son profil
+    public function profile(Request $request)
+    {
+        $user = $request->user();
+        $etudiant = null;
 
-return response()->json([
-    'id'      => $user->id,
-    'nom'     => $user->nom,
-    'prenom'  => $user->prenom,
-    'email'   => $user->email,
-    'role'    => $user->role,
-    'etudiant' => $etudiant ? [
-        'matricule'     => $etudiant->matricule ?? $this->genererMatricule($user, $etudiant),
-        'dateNaissance' => $etudiant->dateNaissance,
-        'lieuNaissance' => $etudiant->lieuNaissance,
-        'filiere'       => $etudiant->filiere,
-        'classe'        => $inscription?->classe?->nomClasse ?? '—',
-    ] : null,
-], 200);
-}
+        if ($user->role === 'etudiant') {
+            $etudiant = Etudiant::where('user_id', $user->id)->first();
+        }
 
-// Modifier son profil
-public function updateProfile(Request $request)
-{
-    $user = $request->user();
-    $request->validate([
-        'nom'    => 'nullable|string|max:255',
-        'prenom' => 'nullable|string|max:255',
-    ]);
-    $user->update($request->only(['nom', 'prenom']));
-    return response()->json($user, 200);
-}
-private function genererMatricule($user, $etudiant): string
-{
-    $classe = \App\Models\Inscription::where('etudiant_id', $etudiant->id)
-        ->with('classe')
-        ->latest()
-        ->first()?->classe?->nomClasse ?? 'CLS';
+        $inscription = Inscription::where('etudiant_id', $etudiant->id)
+            ->with('classe')
+            ->latest()
+            ->first();
 
-    $moisNaissance = $etudiant->dateNaissance
-        ? \Carbon\Carbon::parse($etudiant->dateNaissance)->format('m')
-        : '00';
+        return response()->json([
+            'id' => $user->id,
+            'nom' => $user->nom,
+            'prenom' => $user->prenom,
+            'email' => $user->email,
+            'role' => $user->role,
+            'etudiant' => $etudiant ? [
+                'matricule' => $etudiant->matricule ?? $this->genererMatricule($user, $etudiant),
+                'dateNaissance' => $etudiant->dateNaissance,
+                'lieuNaissance' => $etudiant->lieuNaissance,
+                'filiere' => $etudiant->filiere,
+                'classe' => $inscription?->classe?->nomClasse ?? '—',
+            ] : null,
+        ], 200);
+    }
 
-    $initiales = strtoupper(
-        substr($user->prenom ?? 'X', 0, 1) .
-        substr($user->nom ?? 'X', 0, 1)
-    );
+    // Modifier son profil
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+        $request->validate([
+            'nom' => 'nullable|string|max:255',
+            'prenom' => 'nullable|string|max:255',
+        ]);
+        $user->update($request->only(['nom', 'prenom']));
 
-    $matricule = strtoupper($classe) . '-' . $moisNaissance . '-' . $initiales;
+        return response()->json($user, 200);
+    }
 
-    // Sauvegarder en base
-    $etudiant->update(['matricule' => $matricule]);
+    private function genererMatricule($user, $etudiant): string
+    {
+        $classe = Inscription::where('etudiant_id', $etudiant->id)
+            ->with('classe')
+            ->latest()
+            ->first()?->classe?->nomClasse ?? 'CLS';
 
-    return $matricule;
-}
+        $moisNaissance = $etudiant->dateNaissance
+            ? Carbon::parse($etudiant->dateNaissance)->format('m')
+            : '00';
+
+        $initiales = strtoupper(
+            substr($user->prenom ?? 'X', 0, 1).
+            substr($user->nom ?? 'X', 0, 1)
+        );
+
+        $matricule = strtoupper($classe).'-'.$moisNaissance.'-'.$initiales;
+
+        // Sauvegarder en base
+        $etudiant->update(['matricule' => $matricule]);
+
+        return $matricule;
+    }
+
+    public function indexEnseignants()
+    {
+        $enseignants = User::with('enseignant')
+            ->where('role', 'enseignant')
+            ->get();
+
+        return response()->json($enseignants);
+    }
+
+    public function toggleActif($id)
+    {
+        $user = User::find($id);
+        if (! $user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+        $user->update(['actif' => ! $user->actif]);
+
+        return response()->json([
+            'message' => $user->actif ? 'Compte activé' : 'Compte désactivé',
+            'actif' => $user->actif,
+        ], 200);
+    }
 }

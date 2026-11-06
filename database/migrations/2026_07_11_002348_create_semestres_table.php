@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('semestres', function (Blueprint $table) {
             $table->id();
-            $table->date('dateDebut'); 
-            $table->date('dateFin'); 
+            $table->date('dateDebut');
+            $table->date('dateFin');
             $table->timestamps();
         });
     }
