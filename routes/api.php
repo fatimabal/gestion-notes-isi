@@ -17,7 +17,6 @@ use App\Http\Controllers\SemestreController;
 use App\Http\Controllers\SituationFinanciereController;
 use App\Http\Controllers\UeController;
 use App\Http\Controllers\UserController;
-use App\Models\Etudiant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -109,14 +108,31 @@ Route::middleware(['auth:sanctum', 'check.role:enseignant'])->group(function () 
     Route::post('/evaluations/{id}/deposer-sujet', [EvaluationController::class, 'deposerSujet']);
     Route::get('/reclamations', [ReclamationController::class, 'index']);
     Route::put('/reclamations/{id}', [ReclamationController::class, 'update']);
+    Route::get('/etudiants-liste', [EtudiantController::class, 'liste']);
 });
 
-// ── Groupe Étudiant ──
-Route::middleware(['auth:sanctum', 'check.role:etudiant'])->group(function () {
-    Route::get('/notes', [NoteController::class, 'index']);
-    Route::post('/notes/{id}/reclamer', [NoteController::class, 'reclamer']);
-    Route::get('/bulletins', [BulletinController::class, 'consulter']);
-    Route::post('/reclamations', [ReclamationController::class, 'store']);
+// ── Groupe Enseignant ──
+Route::middleware(['auth:sanctum', 'check.role:enseignant'])->group(function () {
+    Route::get('/notes/mes-notes', [NoteController::class, 'mesNotes']);
+    Route::get('/etudiants-liste', function () {
+    return response()->json(
+        \App\Models\Etudiant::with(['user', 'inscription.classe'])->get()->map(function ($e) {
+            return [
+                'id'        => $e->id,
+                'matricule' => $e->matricule,
+                'classe_id' => $e->inscription->first()?->classe_id,
+                'user'      => ['nom' => $e->user?->nom, 'prenom' => $e->user?->prenom],
+            ];
+        }),
+        200
+    );
+});
+    Route::get('/etudiants', [NoteController::class, 'indexEtudiants']);
+    Route::post('/notes', [NoteController::class, 'store']);
+    Route::put('/notes/{id}', [NoteController::class, 'update']);
+    Route::post('/evaluations/{id}/deposer-sujet', [EvaluationController::class, 'deposerSujet']);
+    Route::get('/reclamations', [ReclamationController::class, 'index']);
+    Route::put('/reclamations/{id}', [ReclamationController::class, 'update']);
 });
 
 // ── Groupe Parent ──
@@ -149,12 +165,12 @@ Route::middleware(['auth:sanctum', 'check.role:scolarite,agent_service_examen'])
     Route::get('/etudiants', [UserController::class, 'indexEtudiants']);
 });
 
-// ── Groupe Comptable ──
-Route::middleware(['auth:sanctum', 'check.role:comptable'])->group(function () {
-    Route::get('/situations-financieres', [SituationFinanciereController::class, 'index']);
-    Route::post('/situations-financieres', [SituationFinanciereController::class, 'store']);
-    Route::put('/situations-financieres/{id}/regulariser', [SituationFinanciereController::class, 'regulariser']);
-    Route::get('/etudiants-liste', function () {
-        return response()->json(Etudiant::with('user')->get(), 200);
-    });
-});
+// // ── Groupe Comptable ──
+// Route::middleware(['auth:sanctum', 'check.role:comptable'])->group(function () {
+//     Route::get('/situations-financieres', [SituationFinanciereController::class, 'index']);
+//     Route::post('/situations-financieres', [SituationFinanciereController::class, 'store']);
+//     Route::put('/situations-financieres/{id}/regulariser', [SituationFinanciereController::class, 'regulariser']);
+//     Route::get('/etudiants-liste', function () {
+//         return response()->json(Etudiant::with('user')->get(), 200);
+//     });
+// });
