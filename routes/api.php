@@ -124,6 +124,8 @@ Route::middleware(['auth:sanctum', 'check.role:etudiant'])->group(function () {
     Route::post('/notes/{id}/reclamer', [NoteController::class, 'reclamer']);
     Route::get('/bulletins', [BulletinController::class, 'consulter']);
     Route::post('/reclamations', [ReclamationController::class, 'store']);
+    Route::get('/reclamations/mes-reclamations', [ReclamationController::class, 'mesReclamations']);
+    Route::post('/reclamations/{id}/relancer', [ReclamationController::class, 'relancer']); 
 });
 
 // ── Groupe Parent ──

@@ -52,4 +52,21 @@ class ReclamationController extends Controller
             'reclamation' => $reclamation,
         ]);
     }
+    public function update(Request $request, $id)
+{
+    $reclamation = Reclamation::find($id);
+    if (!$reclamation) {
+        return response()->json(['message' => 'Réclamation non trouvée'], 404);
+    }
+    $reclamation->update($request->only(['statut', 'reponse']));
+    return response()->json(['message' => 'Réclamation mise à jour', 'reclamation' => $reclamation], 200);
+}
+public function mesReclamations(Request $request)
+{
+    $etudiant = $request->user()->etudiant;
+    $reclamations = Reclamation::with(['note.matiere'])
+        ->where('etudiant_id', $etudiant->id)
+        ->get();
+    return response()->json($reclamations, 200);
+}
 }
