@@ -89,34 +89,36 @@ class UserController extends Controller
 
     // Voir son profil
     public function profile(Request $request)
-    {
-        $user = $request->user();
-        $etudiant = null;
+{
+    $user = $request->user();
+    $etudiant = null;
+    $inscription = null;
 
-        if ($user->role === 'etudiant') {
-            $etudiant = Etudiant::where('user_id', $user->id)->first();
+    if ($user->role === 'etudiant') {
+        $etudiant = Etudiant::where('user_id', $user->id)->first();
+        if ($etudiant) {
+            $inscription = Inscription::where('etudiant_id', $etudiant->id)
+                ->with('classe')
+                ->latest()
+                ->first();
         }
-
-        $inscription = Inscription::where('etudiant_id', $etudiant->id)
-            ->with('classe')
-            ->latest()
-            ->first();
-
-        return response()->json([
-            'id' => $user->id,
-            'nom' => $user->nom,
-            'prenom' => $user->prenom,
-            'email' => $user->email,
-            'role' => $user->role,
-            'etudiant' => $etudiant ? [
-                'matricule' => $etudiant->matricule ?? $this->genererMatricule($user, $etudiant),
-                'dateNaissance' => $etudiant->dateNaissance,
-                'lieuNaissance' => $etudiant->lieuNaissance,
-                'filiere' => $etudiant->filiere,
-                'classe' => $inscription?->classe?->nomClasse ?? '—',
-            ] : null,
-        ], 200);
     }
+
+    return response()->json([
+        'id'      => $user->id,
+        'nom'     => $user->nom,
+        'prenom'  => $user->prenom,
+        'email'   => $user->email,
+        'role'    => $user->role,
+        'etudiant' => $etudiant ? [
+            'matricule'     => $etudiant->matricule ?? $this->genererMatricule($user, $etudiant),
+            'dateNaissance' => $etudiant->dateNaissance,
+            'lieuNaissance' => $etudiant->lieuNaissance,
+            'filiere'       => $etudiant->filiere,
+            'classe'        => $inscription?->classe?->nomClasse ?? '—',
+        ] : null,
+    ], 200);
+}
 
     // Modifier son profil
     public function updateProfile(Request $request)

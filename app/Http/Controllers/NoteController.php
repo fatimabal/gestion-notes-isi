@@ -12,28 +12,28 @@ class NoteController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'valeur' => 'required|numeric|min:0|max:20',
+            'valeur'      => 'required|numeric|min:0|max:20',
             'etudiant_id' => 'required|exists:etudiants,id',
-            'matiere_id' => 'required|exists:modules,id',
+            'matiere_id'  => 'required|exists:modules,id',
             'semestre_id' => 'required|exists:semestres,id',
             'coefficient' => 'nullable|integer|min:1',
-            'type' => 'nullable|string',
-            'statut' => 'nullable|string',
+            'type'        => 'nullable|string',
+            'statut'      => 'nullable|string',
         ]);
 
         $enseignant = $request->user()->enseignant;
 
         $note = Note::create([
-            'valeur' => $request->valeur,
-            'dateSaisie' => now(),
-            'session' => 'normale',
-            'etudiant_id' => $request->etudiant_id,
-            'enseignant_id' => $enseignant->id,
-            'matiere_id' => $request->matiere_id,
-            'semestre_id' => $request->semestre_id,
-            'coefficient' => $request->coefficient ?? 1,
-            'type' => $request->type,
-            'statut' => $request->statut ?? 'brouillon',
+            'valeur'        => $request->valeur,
+            'dateSaisie'    => now(),
+            'session'       => 'normale',
+            'etudiant_id'   => $request->etudiant_id,
+            'enseignant_id' => $enseignant?->id,
+            'matiere_id'    => $request->matiere_id,
+            'semestre_id'   => $request->semestre_id,
+            'coefficient'   => $request->coefficient ?? 1,
+            'type'          => $request->type,
+            'statut'        => $request->statut ?? 'brouillon',
         ]);
 
         return response()->json(['note' => $note], 201);
@@ -86,13 +86,10 @@ class NoteController extends Controller
     public function update(Request $request, $id)
     {
         $note = Note::find($id);
-        if (! $note) {
+        if (!$note) {
             return response()->json(['message' => 'Note non trouvée'], 404);
         }
-        $request->validate([
-            'valeur' => 'required|numeric|min:0|max:20',
-        ]);
-        $note->update(['valeur' => $request->valeur]);
+        $note->update($request->only(['valeur', 'coefficient', 'statut']));
 
         return response()->json(['note' => $note], 200);
     }
@@ -101,7 +98,7 @@ class NoteController extends Controller
     public function valider(Request $request, $id)
     {
         $note = Note::find($id);
-        if (! $note) {
+        if (!$note) {
             return response()->json(['message' => 'Note non trouvée'], 404);
         }
         $note->update(['statut' => 'valide']);
@@ -113,7 +110,7 @@ class NoteController extends Controller
     public function reclamer(Request $request, $id)
     {
         $note = Note::find($id);
-        if (! $note) {
+        if (!$note) {
             return response()->json(['message' => 'Note non trouvée'], 404);
         }
         $request->validate([
@@ -143,4 +140,13 @@ class NoteController extends Controller
 
         return response()->json(['notes' => $notes], 200);
     }
+    public function destroy($id)
+{
+    $note = Note::find($id);
+    if (!$note) {
+        return response()->json(['message' => 'Note non trouvée'], 404);
+    }
+    $note->delete();
+    return response()->json(['message' => 'Note supprimée'], 200);
+}
 }

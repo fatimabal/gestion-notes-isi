@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Note extends Model
 {
     protected $fillable = [
-        'valeur', 'dateSaisie', 'session',
-        'etudiant_id', 'enseignant_id',
-        'matiere_id', 'evaluation_id',
-        'semestre_id',
-        'validee',
-        'reclamation',
-
-    ];
+    'valeur', 'dateSaisie', 'session',
+    'etudiant_id', 'enseignant_id',
+    'matiere_id', 'evaluation_id',
+    'semestre_id',
+    'statut', 'type',
+    'validee',
+    'reclamation',
+];
 
     public function etudiant()
     {
