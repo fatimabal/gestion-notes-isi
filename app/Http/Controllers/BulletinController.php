@@ -172,12 +172,12 @@ private function envoyerNotifications($bulletin, $etudiant)
                 $noteDevoir = Note::where('etudiant_id', $etudiantId)
                     ->where('matiere_id', $module->id)
                     ->where('type', 'Devoir')
-                    ->where('statut', 'publiée')
+                    ->whereIn('statut', ['publiée', 'publie'])
                     ->orderBy('id', 'desc')->first();
                 $noteExamen = Note::where('etudiant_id', $etudiantId)
                     ->where('matiere_id', $module->id)
                     ->where('type', 'Examen')
-                    ->where('statut', 'publiée')
+                    ->whereIn('statut', ['publiée', 'publie'])
                     ->orderBy('id', 'desc')->first();
 
                 $module->notes_detail = [
@@ -227,12 +227,12 @@ private function envoyerNotifications($bulletin, $etudiant)
                 $noteDevoir = Note::where('etudiant_id', $etudiant->id)
                     ->where('matiere_id', $module->id)
                     ->where('type', 'Devoir')
-                    ->where('statut', 'publiée')
+                    ->whereIn('statut', ['publiée', 'publie'])
                     ->orderBy('id', 'desc')->first();
                 $noteExamen = Note::where('etudiant_id', $etudiant->id)
                     ->where('matiere_id', $module->id)
                     ->where('type', 'Examen')
-                    ->where('statut', 'publiée')
+                    ->whereIn('statut', ['publiée', 'publie'])
                     ->orderBy('id', 'desc')->first();
 
                 $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
@@ -277,12 +277,12 @@ public function parSemestre(Request $request, $semestreId)
                 $noteDevoir = Note::where('etudiant_id', $etudiant->id)
                     ->where('matiere_id', $module->id)
                     ->where('type', 'Devoir')
-                    ->where('statut', 'publiée')
+                    ->whereIn('statut', ['publiée', 'publie'])
                     ->orderBy('id', 'desc')->first();
                 $noteExamen = Note::where('etudiant_id', $etudiant->id)
                     ->where('matiere_id', $module->id)
                     ->where('type', 'Examen')
-                    ->where('statut', 'publiée')
+                    ->whereIn('statut', ['publiée', 'publie'])
                     ->orderBy('id', 'desc')->first();
 
                 $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
