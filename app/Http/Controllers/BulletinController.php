@@ -207,7 +207,7 @@ private function envoyerNotifications($bulletin, $etudiant)
 {
     $user = $request->user();
     $etudiant = $user->etudiant ?? null;
-    
+
     if (!$etudiant) {
         return response()->json(['bulletins' => []], 200);
     }
@@ -221,8 +221,13 @@ private function envoyerNotifications($bulletin, $etudiant)
         ->where('etudiant_id', $etudiant->id)
         ->get();
 
+    $inscription = $etudiant->inscription->first();
+    $result = [];
+
     foreach ($bulletins as $bulletin) {
+        $details = [];
         foreach ($bulletin->details as $detail) {
+            $modules = [];
             foreach ($detail->ue->modules as $module) {
                 $noteDevoir = Note::where('etudiant_id', $etudiant->id)
                     ->where('matiere_id', $module->id)
@@ -237,26 +242,35 @@ private function envoyerNotifications($bulletin, $etudiant)
 
                 $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
                 $examen = $noteExamen ? (float)$noteExamen->valeur : 0;
-                $module->setAttribute('mcc', $mcc);
-                $module->setAttribute('examen', $examen);
-                $module->setAttribute('moyenne_module', round($mcc * 0.4 + $examen * 0.6, 2));
+
+                $modules[] = array_merge($module->toArray(), [
+                    'mcc'            => $mcc,
+                    'examen'         => $examen,
+                    'moyenne_module' => round($mcc * 0.4 + $examen * 0.6, 2),
+                ]);
             }
+
+            $details[] = array_merge($detail->toArray(), [
+                'ue' => array_merge($detail->ue->toArray(), ['modules' => $modules]),
+            ]);
         }
 
-        $inscription = $etudiant->inscription->first();
-        $bulletin->infos_etudiant = [
-            'matricule'       => $etudiant->matricule,
-            'sexe'            => $etudiant->sexe,
-            'dateNaissance'   => $etudiant->dateNaissance,
-            'lieuNaissance'   => $etudiant->lieuNaissance,
-            'classe'          => $inscription?->classe?->nomClasse,
-            'filiere'         => $inscription?->classe?->filiere?->nom,
-            'diplome'         => $inscription?->classe?->filiere?->diplome,
-            'anneeAcademique' => $inscription?->anneeAcademique,
-        ];
+        $result[] = array_merge($bulletin->toArray(), [
+            'details' => $details,
+            'infos_etudiant' => [
+                'matricule'       => $etudiant->matricule,
+                'sexe'            => $etudiant->sexe,
+                'dateNaissance'   => $etudiant->dateNaissance,
+                'lieuNaissance'   => $etudiant->lieuNaissance,
+                'classe'          => $inscription?->classe?->nomClasse,
+                'filiere'         => $inscription?->classe?->filiere?->nom,
+                'diplome'         => $inscription?->classe?->filiere?->diplome,
+                'anneeAcademique' => $inscription?->anneeAcademique,
+            ],
+        ]);
     }
 
-    return response()->json(['bulletins' => $bulletins]);
+    return response()->json(['bulletins' => $result]);
 }
 
 public function parSemestre(Request $request, $semestreId)
@@ -270,9 +284,15 @@ public function parSemestre(Request $request, $semestreId)
         ->where('semestre_id', $semestreId)
         ->get();
 
+    $result = [];
+
     foreach ($bulletins as $bulletin) {
         $etudiant = $bulletin->etudiant;
+        $inscription = $etudiant->inscription->first();
+
+        $details = [];
         foreach ($bulletin->details as $detail) {
+            $modules = [];
             foreach ($detail->ue->modules as $module) {
                 $noteDevoir = Note::where('etudiant_id', $etudiant->id)
                     ->where('matiere_id', $module->id)
@@ -287,26 +307,35 @@ public function parSemestre(Request $request, $semestreId)
 
                 $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
                 $examen = $noteExamen ? (float)$noteExamen->valeur : 0;
-                $module->setAttribute('mcc', $mcc);
-                $module->setAttribute('examen', $examen);
-                $module->setAttribute('moyenne_module', round($mcc * 0.4 + $examen * 0.6, 2));
+
+                $modules[] = array_merge($module->toArray(), [
+                    'mcc'            => $mcc,
+                    'examen'         => $examen,
+                    'moyenne_module' => round($mcc * 0.4 + $examen * 0.6, 2),
+                ]);
             }
+
+            $details[] = array_merge($detail->toArray(), [
+                'ue' => array_merge($detail->ue->toArray(), ['modules' => $modules]),
+            ]);
         }
 
-        $inscription = $etudiant->inscription->first();
-        $bulletin->infos_etudiant = [
-            'matricule'       => $etudiant->matricule,
-            'sexe'            => $etudiant->sexe,
-            'dateNaissance'   => $etudiant->dateNaissance,
-            'lieuNaissance'   => $etudiant->lieuNaissance,
-            'classe'          => $inscription?->classe?->nomClasse,
-            'filiere'         => $inscription?->classe?->filiere?->nom,
-            'diplome'         => $inscription?->classe?->filiere?->diplome,
-            'anneeAcademique' => $inscription?->anneeAcademique,
-        ];
+        $result[] = array_merge($bulletin->toArray(), [
+            'details' => $details,
+            'infos_etudiant' => [
+                'matricule'       => $etudiant->matricule,
+                'sexe'            => $etudiant->sexe,
+                'dateNaissance'   => $etudiant->dateNaissance,
+                'lieuNaissance'   => $etudiant->lieuNaissance,
+                'classe'          => $inscription?->classe?->nomClasse,
+                'filiere'         => $inscription?->classe?->filiere?->nom,
+                'diplome'         => $inscription?->classe?->filiere?->diplome,
+                'anneeAcademique' => $inscription?->anneeAcademique,
+            ],
+        ]);
     }
 
-    return response()->json(['bulletins' => $bulletins]);
+    return response()->json(['bulletins' => $result]);
 }
 
 
