@@ -207,7 +207,7 @@ private function envoyerNotifications($bulletin, $etudiant)
 {
     $user = $request->user();
     $etudiant = $user->etudiant ?? null;
-
+    
     if (!$etudiant) {
         return response()->json(['bulletins' => []], 200);
     }
@@ -237,9 +237,9 @@ private function envoyerNotifications($bulletin, $etudiant)
 
                 $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
                 $examen = $noteExamen ? (float)$noteExamen->valeur : 0;
-                $module->mcc    = $mcc;
-                $module->examen = $examen;
-                $module->moyenne_module = round($mcc * 0.4 + $examen * 0.6, 2);
+                $module->setAttribute('mcc', $mcc);
+                $module->setAttribute('examen', $examen);
+                $module->setAttribute('moyenne_module', round($mcc * 0.4 + $examen * 0.6, 2));
             }
         }
 
@@ -287,9 +287,9 @@ public function parSemestre(Request $request, $semestreId)
 
                 $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
                 $examen = $noteExamen ? (float)$noteExamen->valeur : 0;
-                $module->mcc    = $mcc;
-                $module->examen = $examen;
-                $module->moyenne_module = round($mcc * 0.4 + $examen * 0.6, 2);
+                $module->setAttribute('mcc', $mcc);
+                $module->setAttribute('examen', $examen);
+                $module->setAttribute('moyenne_module', round($mcc * 0.4 + $examen * 0.6, 2));
             }
         }
 
