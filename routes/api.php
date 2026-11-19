@@ -118,6 +118,16 @@ Route::middleware(['auth:sanctum', 'check.role:enseignant'])->group(function () 
     Route::put('/reclamations/{id}', [ReclamationController::class, 'update']);
 });
 
+// Bulletins
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/bulletins/generer-masse', [BulletinController::class, 'genererMasse']);
+    Route::post('/bulletins/generer', [BulletinController::class, 'generer']);
+    Route::get('/bulletins/enfant', [BulletinController::class, 'enfant']);
+    Route::get('/bulletins/mes-bulletins', [BulletinController::class, 'mesBulletins']);
+    Route::get('/bulletins/semestre/{semestreId}', [BulletinController::class, 'parSemestre']);
+    Route::get('/bulletins/{etudiantId}/{semestreId}', [BulletinController::class, 'show']);
+});
+
 // ── Groupe Étudiant ──
 Route::middleware(['auth:sanctum', 'check.role:etudiant'])->group(function () {
     Route::get('/notes', [NoteController::class, 'index']);
@@ -126,6 +136,7 @@ Route::middleware(['auth:sanctum', 'check.role:etudiant'])->group(function () {
     Route::post('/reclamations', [ReclamationController::class, 'store']);
     Route::get('/reclamations/mes-reclamations', [ReclamationController::class, 'mesReclamations']);
     Route::post('/reclamations/{id}/relancer', [ReclamationController::class, 'relancer']); 
+    
 });
 
 // ── Groupe Parent ──

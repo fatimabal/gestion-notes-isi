@@ -106,49 +106,49 @@ class BulletinController extends Controller
     }
 
     // Envoie notifications à étudiant + parents + chefs de département
-private function envoyerNotifications($bulletin, $etudiant)
-{
-    $semestre = $bulletin->semestre->libelle ?? 'Semestre';
-    $nomEtudiant = $etudiant->user->prenom . ' ' . $etudiant->user->nom;
+    private function envoyerNotifications($bulletin, $etudiant)
+    {
+        $semestre = $bulletin->semestre->libelle ?? 'Semestre';
+        $nomEtudiant = $etudiant->user->prenom . ' ' . $etudiant->user->nom;
 
-    // Notification à l'étudiant
-    Notification::create([
-        'type' => 'bulletin',
-        'notifiable_type' => 'App\\Models\\User',
-        'notifiable_id' => $etudiant->user_id,
-        'data' => json_encode([
-            'message' => "Votre bulletin du {$semestre} est disponible. Moyenne : {$bulletin->moyenne_generale}/20 — {$bulletin->mention}",
-            'bulletin_id' => $bulletin->id,
-        ]),
-    ]);
-
-    // Notifications aux parents
-    foreach ($etudiant->parents as $parent) {
+        // Notification à l'étudiant
         Notification::create([
             'type' => 'bulletin',
             'notifiable_type' => 'App\\Models\\User',
-            'notifiable_id' => $parent->user_id,
+            'notifiable_id' => $etudiant->user_id,
             'data' => json_encode([
-                'message' => "Le bulletin du {$semestre} de {$nomEtudiant} est disponible. Moyenne : {$bulletin->moyenne_generale}/20 — {$bulletin->mention}",
+                'message' => "Votre bulletin du {$semestre} est disponible. Moyenne : {$bulletin->moyenne_generale}/20 — {$bulletin->mention}",
                 'bulletin_id' => $bulletin->id,
             ]),
         ]);
-    }
 
-    // Notifications aux chefs de département
-    $chefs = User::where('role', 'chef_departement')->get();
-    foreach ($chefs as $chef) {
-        Notification::create([
-            'type' => 'bulletin',
-            'notifiable_type' => 'App\\Models\\User',
-            'notifiable_id' => $chef->id,
-            'data' => json_encode([
-                'message' => "Bulletin généré — {$nomEtudiant} — {$semestre} : {$bulletin->moyenne_generale}/20 — {$bulletin->mention}",
-                'bulletin_id' => $bulletin->id,
-            ]),
-        ]);
+        // Notifications aux parents
+        foreach ($etudiant->parents as $parent) {
+            Notification::create([
+                'type' => 'bulletin',
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $parent->user_id,
+                'data' => json_encode([
+                    'message' => "Le bulletin du {$semestre} de {$nomEtudiant} est disponible. Moyenne : {$bulletin->moyenne_generale}/20 — {$bulletin->mention}",
+                    'bulletin_id' => $bulletin->id,
+                ]),
+            ]);
+        }
+
+        // Notifications aux chefs de département
+        $chefs = User::where('role', 'chef_departement')->get();
+        foreach ($chefs as $chef) {
+            Notification::create([
+                'type' => 'bulletin',
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $chef->id,
+                'data' => json_encode([
+                    'message' => "Bulletin généré — {$nomEtudiant} — {$semestre} : {$bulletin->moyenne_generale}/20 — {$bulletin->mention}",
+                    'bulletin_id' => $bulletin->id,
+                ]),
+            ]);
+        }
     }
-}
 
     // Consulter le bulletin d'un étudiant
     public function show(Request $request, $etudiantId, $semestreId)
@@ -202,142 +202,141 @@ private function envoyerNotifications($bulletin, $etudiant)
         return response()->json(['bulletins' => $bulletins], 200);
     }
 
-    // Mes bulletins (espace étudiant)
- public function mesBulletins(Request $request)
-{
-    $user = $request->user();
-    $etudiant = $user->etudiant ?? null;
+       // Mes bulletins (espace étudiant)
+    public function mesBulletins(Request $request)
+    {
+        $user = $request->user();
+        $etudiant = $user->etudiant ?? null;
 
-    if (!$etudiant) {
-        return response()->json(['bulletins' => []], 200);
-    }
-
-    $bulletins = Bulletin::with([
-        'semestre',
-        'details.ue.modules.evaluations',
-        'etudiant.user',
-        'etudiant.inscription.classe.filiere',
-    ])
-        ->where('etudiant_id', $etudiant->id)
-        ->get();
-
-    $inscription = $etudiant->inscription->first();
-    $result = [];
-
-    foreach ($bulletins as $bulletin) {
-        $details = [];
-        foreach ($bulletin->details as $detail) {
-            $modules = [];
-            foreach ($detail->ue->modules as $module) {
-                $noteDevoir = Note::where('etudiant_id', $etudiant->id)
-                    ->where('matiere_id', $module->id)
-                    ->where('type', 'Devoir')
-                    ->whereIn('statut', ['publiée', 'publie'])
-                    ->orderBy('id', 'desc')->first();
-                $noteExamen = Note::where('etudiant_id', $etudiant->id)
-                    ->where('matiere_id', $module->id)
-                    ->where('type', 'Examen')
-                    ->whereIn('statut', ['publiée', 'publie'])
-                    ->orderBy('id', 'desc')->first();
-
-                $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
-                $examen = $noteExamen ? (float)$noteExamen->valeur : 0;
-
-                $modules[] = array_merge($module->toArray(), [
-                    'mcc'            => $mcc,
-                    'examen'         => $examen,
-                    'moyenne_module' => round($mcc * 0.4 + $examen * 0.6, 2),
-                ]);
-            }
-
-            $details[] = array_merge($detail->toArray(), [
-                'ue' => array_merge($detail->ue->toArray(), ['modules' => $modules]),
-            ]);
+        if (!$etudiant) {
+            return response()->json(['bulletins' => []], 200);
         }
 
-        $result[] = array_merge($bulletin->toArray(), [
-            'details' => $details,
-            'infos_etudiant' => [
-                'matricule'       => $etudiant->matricule,
-                'sexe'            => $etudiant->sexe,
-                'dateNaissance'   => $etudiant->dateNaissance,
-                'lieuNaissance'   => $etudiant->lieuNaissance,
-                'classe'          => $inscription?->classe?->nomClasse,
-                'filiere'         => $inscription?->classe?->filiere?->nom,
-                'diplome'         => $inscription?->classe?->filiere?->diplome,
-                'anneeAcademique' => $inscription?->anneeAcademique,
-            ],
-        ]);
-    }
+        $bulletins = Bulletin::with([
+            'semestre',
+            'details.ue.modules.evaluations',
+            'etudiant.user',
+            'etudiant.inscription.classe.filiere',
+        ])
+            ->where('etudiant_id', $etudiant->id)
+            ->get();
 
-    return response()->json(['bulletins' => $result]);
-}
-
-public function parSemestre(Request $request, $semestreId)
-{
-    $bulletins = Bulletin::with([
-        'etudiant.user',
-        'etudiant.inscription.classe.filiere',
-        'semestre',
-        'details.ue.modules.evaluations',
-    ])
-        ->where('semestre_id', $semestreId)
-        ->get();
-
-    $result = [];
-
-    foreach ($bulletins as $bulletin) {
-        $etudiant = $bulletin->etudiant;
         $inscription = $etudiant->inscription->first();
+        $result = [];
 
-        $details = [];
-        foreach ($bulletin->details as $detail) {
-            $modules = [];
-            foreach ($detail->ue->modules as $module) {
-                $noteDevoir = Note::where('etudiant_id', $etudiant->id)
-                    ->where('matiere_id', $module->id)
-                    ->where('type', 'Devoir')
-                    ->whereIn('statut', ['publiée', 'publie'])
-                    ->orderBy('id', 'desc')->first();
-                $noteExamen = Note::where('etudiant_id', $etudiant->id)
-                    ->where('matiere_id', $module->id)
-                    ->where('type', 'Examen')
-                    ->whereIn('statut', ['publiée', 'publie'])
-                    ->orderBy('id', 'desc')->first();
+        foreach ($bulletins as $bulletin) {
+            $details = [];
+            foreach ($bulletin->details as $detail) {
+                $modules = [];
+                foreach ($detail->ue->modules as $module) {
+                    $noteDevoir = Note::where('etudiant_id', $etudiant->id)
+                        ->where('matiere_id', $module->id)
+                        ->where('type', 'Devoir')
+                        ->whereIn('statut', ['publiée', 'publie'])
+                        ->orderBy('id', 'desc')->first();
+                    $noteExamen = Note::where('etudiant_id', $etudiant->id)
+                        ->where('matiere_id', $module->id)
+                        ->where('type', 'Examen')
+                        ->whereIn('statut', ['publiée', 'publie'])
+                        ->orderBy('id', 'desc')->first();
 
-                $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
-                $examen = $noteExamen ? (float)$noteExamen->valeur : 0;
+                    $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
+                    $examen = $noteExamen ? (float)$noteExamen->valeur : 0;
 
-                $modules[] = array_merge($module->toArray(), [
-                    'mcc'            => $mcc,
-                    'examen'         => $examen,
-                    'moyenne_module' => round($mcc * 0.4 + $examen * 0.6, 2),
+                    $modules[] = array_merge($module->toArray(), [
+                        'mcc'            => $mcc,
+                        'examen'         => $examen,
+                        'moyenne_module' => round($mcc * 0.4 + $examen * 0.6, 2),
+                    ]);
+                }
+
+                $details[] = array_merge($detail->toArray(), [
+                    'ue' => array_merge($detail->ue->toArray(), ['modules' => $modules]),
                 ]);
             }
 
-            $details[] = array_merge($detail->toArray(), [
-                'ue' => array_merge($detail->ue->toArray(), ['modules' => $modules]),
+            $result[] = array_merge($bulletin->toArray(), [
+                'details' => $details,
+                'infos_etudiant' => [
+                    'matricule'       => $etudiant->matricule,
+                    'sexe'            => $etudiant->sexe,
+                    'dateNaissance'   => $etudiant->dateNaissance,
+                    'lieuNaissance'   => $etudiant->lieuNaissance,
+                    'classe'          => $inscription?->classe?->nomClasse,
+                    'filiere'         => $inscription?->classe?->filiere?->nom,
+                    'diplome'         => $inscription?->classe?->filiere?->diplome,
+                    'anneeAcademique' => $inscription?->anneeAcademique,
+                ],
             ]);
         }
 
-        $result[] = array_merge($bulletin->toArray(), [
-            'details' => $details,
-            'infos_etudiant' => [
-                'matricule'       => $etudiant->matricule,
-                'sexe'            => $etudiant->sexe,
-                'dateNaissance'   => $etudiant->dateNaissance,
-                'lieuNaissance'   => $etudiant->lieuNaissance,
-                'classe'          => $inscription?->classe?->nomClasse,
-                'filiere'         => $inscription?->classe?->filiere?->nom,
-                'diplome'         => $inscription?->classe?->filiere?->diplome,
-                'anneeAcademique' => $inscription?->anneeAcademique,
-            ],
-        ]);
+        return response()->json(['bulletins' => $result]);
     }
 
-    return response()->json(['bulletins' => $result]);
-}
+    public function parSemestre(Request $request, $semestreId)
+    {
+        $bulletins = Bulletin::with([
+            'etudiant.user',
+            'etudiant.inscription.classe.filiere',
+            'semestre',
+            'details.ue.modules.evaluations',
+        ])
+            ->where('semestre_id', $semestreId)
+            ->get();
 
+        $result = [];
+
+        foreach ($bulletins as $bulletin) {
+            $etudiant = $bulletin->etudiant;
+            $inscription = $etudiant->inscription->first();
+
+            $details = [];
+            foreach ($bulletin->details as $detail) {
+                $modules = [];
+                foreach ($detail->ue->modules as $module) {
+                    $noteDevoir = Note::where('etudiant_id', $etudiant->id)
+                        ->where('matiere_id', $module->id)
+                        ->where('type', 'Devoir')
+                        ->whereIn('statut', ['publiée', 'publie'])
+                        ->orderBy('id', 'desc')->first();
+                    $noteExamen = Note::where('etudiant_id', $etudiant->id)
+                        ->where('matiere_id', $module->id)
+                        ->where('type', 'Examen')
+                        ->whereIn('statut', ['publiée', 'publie'])
+                        ->orderBy('id', 'desc')->first();
+
+                    $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
+                    $examen = $noteExamen ? (float)$noteExamen->valeur : 0;
+
+                    $modules[] = array_merge($module->toArray(), [
+                        'mcc'            => $mcc,
+                        'examen'         => $examen,
+                        'moyenne_module' => round($mcc * 0.4 + $examen * 0.6, 2),
+                    ]);
+                }
+
+                $details[] = array_merge($detail->toArray(), [
+                    'ue' => array_merge($detail->ue->toArray(), ['modules' => $modules]),
+                ]);
+            }
+
+            $result[] = array_merge($bulletin->toArray(), [
+                'details' => $details,
+                'infos_etudiant' => [
+                    'matricule'       => $etudiant->matricule,
+                    'sexe'            => $etudiant->sexe,
+                    'dateNaissance'   => $etudiant->dateNaissance,
+                    'lieuNaissance'   => $etudiant->lieuNaissance,
+                    'classe'          => $inscription?->classe?->nomClasse,
+                    'filiere'         => $inscription?->classe?->filiere?->nom,
+                    'diplome'         => $inscription?->classe?->filiere?->diplome,
+                    'anneeAcademique' => $inscription?->anneeAcademique,
+                ],
+            ]);
+        }
+
+        return response()->json(['bulletins' => $result]);
+    }
 
     private function calculerMoyenneModule($module, $etudiantId): float
     {
@@ -374,5 +373,4 @@ public function parSemestre(Request $request, $semestreId)
         if ($moyenne >= 10) return 'Passable';
         return 'Insuffisant';
     }
-  
 }
