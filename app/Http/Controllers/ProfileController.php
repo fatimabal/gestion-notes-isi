@@ -12,6 +12,7 @@ class ProfileController extends Controller
         $user = $request->user();
         $etudiant = $user->etudiant;
         $inscription = $etudiant?->inscription?->first();
+        $chef = $user->chefDepartement;
 
         return response()->json([
             'id'        => $user->id,
@@ -30,6 +31,14 @@ class ProfileController extends Controller
                 'diplome'        => $inscription?->classe?->filiere?->diplome,
                 'anneeAcademique'=> $inscription?->anneeAcademique,
             ] : null,
+            'chefDepartement' => $chef ? [
+                'specialite'  => $chef->specialite,
+                'grade'       => $chef->grade,
+                'mandat'      => $chef->mandat,
+                'dateDebut'   => $chef->dateDebut,
+                'dateFin'     => $chef->dateFin,
+                'departement' => $chef->departement?->nom,
+            ] : null,
         ], 200);
     }
 
@@ -44,17 +53,22 @@ class ProfileController extends Controller
             'dateNaissance' => 'sometimes|nullable|string',
             'lieuNaissance' => 'sometimes|nullable|string|max:255',
             'sexe'          => 'sometimes|nullable|in:M,F',
+            'specialite'    => 'sometimes|nullable|string|max:255',
+            'grade'         => 'sometimes|nullable|string|max:255',
+            'mandat'        => 'sometimes|nullable|string|max:255',
+            'dateDebut'     => 'sometimes|nullable|string',
+            'dateFin'       => 'sometimes|nullable|string',
         ]);
 
         $user = $request->user();
 
         // Mise à jour champs user
         $champsUser = [];
-        if ($request->filled('nom'))      $champsUser['nom']      = $request->nom;
-        if ($request->filled('prenom'))   $champsUser['prenom']   = $request->prenom;
+        if ($request->filled('nom'))      $champsUser['nom']       = $request->nom;
+        if ($request->filled('prenom'))   $champsUser['prenom']    = $request->prenom;
         if ($request->has('telephone'))   $champsUser['telephone'] = $request->telephone;
-        if ($request->filled('email'))    $champsUser['email']    = $request->email;
-        if ($request->filled('password')) $champsUser['password'] = Hash::make($request->password);
+        if ($request->filled('email'))    $champsUser['email']     = $request->email;
+        if ($request->filled('password')) $champsUser['password']  = Hash::make($request->password);
 
         if (!empty($champsUser)) {
             $user->update($champsUser);
@@ -70,6 +84,21 @@ class ProfileController extends Controller
 
             if (!empty($champsEtudiant)) {
                 $etudiant->update($champsEtudiant);
+            }
+        }
+
+        // Mise à jour champs chef de département
+        $chef = $user->chefDepartement;
+        if ($chef) {
+            $champsChef = [];
+            if ($request->has('specialite')) $champsChef['specialite'] = $request->specialite;
+            if ($request->has('grade'))      $champsChef['grade']      = $request->grade;
+            if ($request->has('mandat'))     $champsChef['mandat']     = $request->mandat;
+            if ($request->has('dateDebut'))  $champsChef['dateDebut']  = $request->dateDebut;
+            if ($request->has('dateFin'))    $champsChef['dateFin']    = $request->dateFin;
+
+            if (!empty($champsChef)) {
+                $chef->update($champsChef);
             }
         }
 
