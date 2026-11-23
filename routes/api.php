@@ -126,6 +126,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bulletins/mes-bulletins', [BulletinController::class, 'mesBulletins']);
     Route::get('/bulletins/semestre/{semestreId}', [BulletinController::class, 'parSemestre']);
     Route::get('/bulletins/{etudiantId}/{semestreId}', [BulletinController::class, 'show']);
+    Route::get('/bulletins/enfant', [BulletinController::class, 'enfant']);
+
 });
 
 // ── Groupe Étudiant ──
@@ -142,12 +144,14 @@ Route::middleware(['auth:sanctum', 'check.role:etudiant'])->group(function () {
 // ── Groupe Parent ──
 Route::middleware(['auth:sanctum', 'check.role:parent'])->group(function () {
     Route::get('/notes/enfant', [NoteController::class, 'notesEnfant']);
-    Route::get('/bulletins/enfant', [BulletinController::class, 'consulterEnfant']);
+    Route::get('/bulletins/enfant', [BulletinController::class, 'enfant']);
 });
 
 // ── Groupe Chef Département ──
 Route::middleware(['auth:sanctum', 'check.role:chef_departement'])->group(function () {
     Route::get('/notes/toutes', [NoteController::class, 'toutes']);
+    Route::get('/reclamations/toutes', [ReclamationController::class, 'toutes']);
+    Route::put('/reclamations/{id}', [ReclamationController::class, 'update']);
     Route::put('/reclamations/{id}/relancer', [ReclamationController::class, 'relancer']);
     Route::get('/deliberations', [DeliberationController::class, 'index']);
     Route::post('/deliberations/valider', [DeliberationController::class, 'valider']);

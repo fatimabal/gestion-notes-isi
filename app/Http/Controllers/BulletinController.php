@@ -193,15 +193,69 @@ class BulletinController extends Controller
 
     // Bulletins de l'enfant (espace parent)
     public function enfant(Request $request)
-    {
-        $parent = $request->user()->parentEtudiant;
-        $etudiantIds = $parent->etudiants()->pluck('etudiants.id');
-        $bulletins = Bulletin::with(['details.ue', 'semestre', 'etudiant.user'])
-            ->whereIn('etudiant_id', $etudiantIds)
-            ->get();
-        return response()->json(['bulletins' => $bulletins], 200);
+{
+    $parent = $request->user()->parentEtudiant;
+    if (!$parent) {
+        return response()->json(['bulletins' => []], 200);
+    }
+    $etudiantIds = $parent->etudiants()->pluck('etudiants.id');
+
+    $bulletins = Bulletin::with([
+        'semestre',
+        'details.ue.modules.evaluations',
+        'etudiant.user',
+        'etudiant.inscription.classe.filiere',
+    ])
+        ->whereIn('etudiant_id', $etudiantIds)
+        ->get();
+
+    $result = [];
+    foreach ($bulletins as $bulletin) {
+        $etudiant = $bulletin->etudiant;
+        $inscription = $etudiant->inscription->first();
+        $details = [];
+        foreach ($bulletin->details as $detail) {
+            $modules = [];
+            foreach ($detail->ue->modules as $module) {
+                $noteDevoir = Note::where('etudiant_id', $etudiant->id)
+                    ->where('matiere_id', $module->id)
+                    ->where('type', 'Devoir')
+                    ->whereIn('statut', ['publiée', 'publie'])
+                    ->orderBy('id', 'desc')->first();
+                $noteExamen = Note::where('etudiant_id', $etudiant->id)
+                    ->where('matiere_id', $module->id)
+                    ->where('type', 'Examen')
+                    ->whereIn('statut', ['publiée', 'publie'])
+                    ->orderBy('id', 'desc')->first();
+                $mcc    = $noteDevoir ? (float)$noteDevoir->valeur : 0;
+                $examen = $noteExamen ? (float)$noteExamen->valeur : 0;
+                $modules[] = array_merge($module->toArray(), [
+                    'mcc'            => $mcc,
+                    'examen'         => $examen,
+                    'moyenne_module' => round($mcc * 0.4 + $examen * 0.6, 2),
+                ]);
+            }
+            $details[] = array_merge($detail->toArray(), [
+                'ue' => array_merge($detail->ue->toArray(), ['modules' => $modules]),
+            ]);
+        }
+        $result[] = array_merge($bulletin->toArray(), [
+            'details' => $details,
+            'infos_etudiant' => [
+                'matricule'       => $etudiant->matricule,
+                'sexe'            => $etudiant->sexe,
+                'dateNaissance'   => $etudiant->dateNaissance,
+                'lieuNaissance'   => $etudiant->lieuNaissance,
+                'classe'          => $inscription?->classe?->nomClasse,
+                'filiere'         => $inscription?->classe?->filiere?->nom,
+                'diplome'         => $inscription?->classe?->filiere?->diplome,
+                'anneeAcademique' => $inscription?->anneeAcademique,
+            ],
+        ]);
     }
 
+    return response()->json(['bulletins' => $result], 200);
+}
        // Mes bulletins (espace étudiant)
     public function mesBulletins(Request $request)
     {

@@ -8,10 +8,29 @@ use Illuminate\Http\Request;
 
 class ReclamationController extends Controller
 {
-    public function index()
+    // Pour l'enseignant : ses réclamations uniquement
+    public function index(Request $request)
+    {
+        $enseignant = $request->user()->enseignant;
+        if (!$enseignant) {
+            return response()->json([], 200);
+        }
+
+        return response()->json(
+            Reclamation::with(['etudiant.user', 'note.matiere'])
+                ->whereHas('note', function ($q) use ($enseignant) {
+                    $q->where('enseignant_id', $enseignant->id);
+                })
+                ->get()
+        );
+    }
+
+    // Pour le chef de département : toutes les réclamations
+    public function toutes(Request $request)
     {
         return response()->json(
-            Reclamation::with(['etudiant.user', 'note.evaluation.matiere'])->get()
+            Reclamation::with(['etudiant.user', 'note.matiere'])
+                ->get()
         );
     }
 
@@ -21,9 +40,9 @@ class ReclamationController extends Controller
 
         $reclamation = Reclamation::create([
             'etudiant_id' => $user->etudiant->id,
-            'note_id' => $request->note_id,
-            'motif' => $request->motif,
-            'statut' => 'en_attente',
+            'note_id'     => $request->note_id,
+            'motif'       => $request->motif,
+            'statut'      => 'en_attente',
         ]);
 
         return response()->json($reclamation, 201);
@@ -34,12 +53,12 @@ class ReclamationController extends Controller
         $reclamation = Reclamation::with([
             'etudiant.user',
             'note.evaluation.matiere',
-            'note.evaluation.enseignant.user',   // ← correction ici
+            'note.evaluation.enseignant.user',
         ])->findOrFail($id);
 
         $reclamation->update(['statut' => 'relancee']);
 
-        $enseignant = $reclamation->note->evaluation->enseignant ?? null;  // ← correction ici
+        $enseignant = $reclamation->note->evaluation->enseignant ?? null;
         if ($enseignant && $enseignant->user) {
             $enseignant->user->notify(new ReclamationRelancee(
                 matiere: $reclamation->note->evaluation->matiere->nom ?? 'Matière inconnue',
@@ -48,25 +67,34 @@ class ReclamationController extends Controller
         }
 
         return response()->json([
-            'message' => 'Réclamation relancée, enseignant notifié.',
-            'reclamation' => $reclamation,
+            'message'      => 'Réclamation relancée, enseignant notifié.',
+            'reclamation'  => $reclamation,
         ]);
     }
+
     public function update(Request $request, $id)
-{
-    $reclamation = Reclamation::find($id);
-    if (!$reclamation) {
-        return response()->json(['message' => 'Réclamation non trouvée'], 404);
+    {
+        $reclamation = Reclamation::with(['etudiant.user'])->find($id);
+        if (!$reclamation) {
+            return response()->json(['message' => 'Réclamation non trouvée'], 404);
+        }
+        $reclamation->update($request->only(['statut', 'reponse']));
+
+        if ($request->statut === 'traitee' && $reclamation->etudiant?->user) {
+            $reclamation->etudiant->user->notify(
+                new \App\Notifications\ReclamationTraitee($reclamation)
+            );
+        }
+
+        return response()->json(['message' => 'Réclamation mise à jour', 'reclamation' => $reclamation], 200);
     }
-    $reclamation->update($request->only(['statut', 'reponse']));
-    return response()->json(['message' => 'Réclamation mise à jour', 'reclamation' => $reclamation], 200);
-}
-public function mesReclamations(Request $request)
-{
-    $etudiant = $request->user()->etudiant;
-    $reclamations = Reclamation::with(['note.matiere'])
-        ->where('etudiant_id', $etudiant->id)
-        ->get();
-    return response()->json($reclamations, 200);
-}
+
+    public function mesReclamations(Request $request)
+    {
+        $etudiant = $request->user()->etudiant;
+        $reclamations = Reclamation::with(['note.matiere'])
+            ->where('etudiant_id', $etudiant->id)
+            ->get();
+        return response()->json($reclamations, 200);
+    }
 }

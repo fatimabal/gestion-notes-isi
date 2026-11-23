@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AgentServiceExamen;
 use App\Models\ChefDepartement;
-use App\Models\Comptable;
 use App\Models\Enseignant;
 use App\Models\Etudiant;
 use App\Models\Inscription;
@@ -65,13 +63,6 @@ class AuthController extends Controller
                     'annee' => date('Y'),
                 ]);
             }
-            if ($request->classeId) {
-                Inscription::create([
-                    'etudiant_id' => $etudiant->id,
-                    'classe_id' => $request->classeId,
-                    'annee' => date('Y'),
-                ]);
-            }
         } elseif ($request->role === 'parent') {
             $parent = ParentEtudiant::create([
                 'user_id' => $user->id,
@@ -103,14 +94,6 @@ class AuthController extends Controller
                 'dateDebut' => $request->dateDebut ?? null,
                 'dateFin' => $request->dateFin ?? null,
             ]);
-        } elseif ($request->role === 'comptable') {
-            Comptable::create([
-                'user_id' => $user->id,
-            ]);
-        } elseif ($request->role === 'agent_service_examen') {
-            AgentServiceExamen::create([
-                'user_id' => $user->id,
-            ]);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -122,34 +105,32 @@ class AuthController extends Controller
     }
 
     public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:6',
-        ]);
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|min:6',
+    ]);
 
-        if (! Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            return response()->json(['message' => 'Identifiants incorrects'], 401);
-        }
+    $user = User::where('email', $request->email)->first();
 
-        $user = Auth::user();
-
-        if (! $user->actif) {
-            Auth::logout();
-
-            return response()->json(['message' => 'Compte non activé. Contactez l\'administrateur.'], 403);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-            'nom' => $user->nom,
-            'prenom' => $user->prenom,
-            'role' => $user->role,
-        ], 200);
+    if (!$user || !\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+        return response()->json(['message' => 'Identifiants incorrects'], 401);
     }
+
+    if (!$user->actif) {
+        return response()->json(['message' => 'Compte non activé. Contactez l\'administrateur.'], 403);
+    }
+
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'user' => $user,
+        'token' => $token,
+        'nom' => $user->nom,
+        'prenom' => $user->prenom,
+        'role' => $user->role,
+    ], 200);
+}
 
     public function logout(Request $request)
     {

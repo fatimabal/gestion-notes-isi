@@ -14,7 +14,7 @@ class NoteController extends Controller
         $request->validate([
             'valeur'      => 'required|numeric|min:0|max:20',
             'etudiant_id' => 'required|exists:etudiants,id',
-            'matiere_id'  => 'required|exists:modules,id',
+            'matiere_id'  => 'required|exists:matieres,id',
             'semestre_id' => 'required|exists:semestres,id',
             'coefficient' => 'nullable|integer|min:1',
             'type'        => 'nullable|string',
@@ -140,13 +140,4 @@ class NoteController extends Controller
 
         return response()->json(['notes' => $notes], 200);
     }
-    public function destroy($id)
-{
-    $note = Note::find($id);
-    if (!$note) {
-        return response()->json(['message' => 'Note non trouvée'], 404);
-    }
-    $note->delete();
-    return response()->json(['message' => 'Note supprimée'], 200);
-}
 }

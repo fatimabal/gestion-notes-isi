@@ -7,18 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Bulletin extends Model
 {
     protected $fillable = [
-        'session', 'moyenne_generale', 'mention',
-        'dateGeneration', 'etudiant_id', 'semestre_id',
+        'etudiant_id', 'semestre_id', 'session',
+        'moyenne_generale', 'mention', 'dateGeneration',
     ];
 
-    public function etudiant()
-    {
-        return $this->belongsTo(Etudiant::class);
-
-    }
-
-    public function semestre()
-    {
-        return $this->belongsTo(Semestre::class);
-    }
+    public function etudiant() { return $this->belongsTo(Etudiant::class); }
+    public function semestre() { return $this->belongsTo(Semestre::class); }
+    public function details() { return $this->hasMany(DetailBulletin::class); }
 }

@@ -15,6 +15,7 @@ class Ue extends Model
 
     public function modules()
     {
-        return $this->hasMany(Matiere::class);
+       return $this->hasMany(Matiere::class, 'ue_id');
     }
+    
 }
