@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Etudiant;
 use App\Models\Note;
 use Illuminate\Http\Request;
+use App\Models\HistoriqueModification;
 
 class NoteController extends Controller
 {
@@ -84,15 +85,30 @@ class NoteController extends Controller
 
     // Modifier une note
     public function update(Request $request, $id)
-    {
-        $note = Note::find($id);
-        if (!$note) {
-            return response()->json(['message' => 'Note non trouvée'], 404);
-        }
-        $note->update($request->only(['valeur', 'coefficient', 'statut']));
-
-        return response()->json(['note' => $note], 200);
+{
+    $note = Note::find($id);
+    if (!$note) {
+        return response()->json(['message' => 'Note non trouvée'], 404);
     }
+
+    $ancienneValeur = $note->valeur;
+
+    $note->update($request->only(['valeur', 'coefficient', 'statut']));
+
+    // Historiser si la valeur a changé
+    if ($request->has('valeur') && $request->valeur != $ancienneValeur) {
+        HistoriqueModification::create([
+            'dateAction'    => now(),
+            'ancienneValeur'=> $ancienneValeur,
+            'nouvelleValeur'=> $request->valeur,
+            'typeAction'    => 'modification',
+            'note_id'       => $note->id,
+            'user_id'       => $request->user()->id,
+        ]);
+    }
+
+    return response()->json(['note' => $note], 200);
+}
 
     // Valider une note (scolarité)
     public function valider(Request $request, $id)
@@ -130,14 +146,50 @@ class NoteController extends Controller
     }
 
     // Notes de l'enfant (parent)
-    public function notesEnfant(Request $request)
-    {
-        $parent = $request->user()->parentEtudiant;
-        $notes = Note::with(['matiere', 'semestre'])
-            ->where('etudiant_id', $parent->etudiant_id)
-            ->where('statut', 'publie')
-            ->get();
+   public function notesEnfant(Request $request)
+{
+    $parent = $request->user()->parentEtudiant;
+    $etudiant = $parent->etudiants()->first();
 
-        return response()->json(['notes' => $notes], 200);
+    if (!$etudiant) {
+        return response()->json(['notes' => []], 200);
     }
+
+    $notes = Note::with(['matiere', 'semestre'])
+        ->where('etudiant_id', $etudiant->id)
+        ->whereIn('statut', ['valide', 'publie', 'publiée'])
+        ->get();
+
+    return response()->json(['notes' => $notes], 200);
+}
+// Journal des modifications (admin + chef département)
+public function journal(Request $request)
+{
+    $historique = HistoriqueModification::with([
+        'note.matiere',
+        'note.etudiant.user',
+        'user',
+    ])->orderBy('dateAction', 'desc')->get();
+
+    return response()->json($historique);
+}
+public function destroy(Request $request, $id)
+{
+    $note = Note::find($id);
+    if (!$note) {
+        return response()->json(['message' => 'Note non trouvée'], 404);
+    }
+
+    $enseignant = $request->user()->enseignant;
+    if ($note->enseignant_id !== $enseignant?->id) {
+        return response()->json(['message' => 'Non autorisé'], 403);
+    }
+
+    // Supprimer les réclamations et l'historique liés avant de supprimer la note
+    $note->reclamations()->delete();
+    $note->historiques()->delete();
+    $note->delete();
+
+    return response()->json(['message' => 'Note supprimée'], 200);
+}
 }

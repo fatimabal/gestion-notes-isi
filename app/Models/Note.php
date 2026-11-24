@@ -45,4 +45,13 @@ class Note extends Model
         return $this->belongsTo(Semestre::class);
 
     }
+    public function reclamations()
+{
+    return $this->hasMany(\App\Models\Reclamation::class);
+}
+
+public function historiques()
+{
+    return $this->hasMany(\App\Models\HistoriqueModification::class);
+}
 }

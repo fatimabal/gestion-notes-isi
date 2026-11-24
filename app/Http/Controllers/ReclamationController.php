@@ -90,11 +90,14 @@ class ReclamationController extends Controller
     }
 
     public function mesReclamations(Request $request)
-    {
-        $etudiant = $request->user()->etudiant;
-        $reclamations = Reclamation::with(['note.matiere'])
-            ->where('etudiant_id', $etudiant->id)
-            ->get();
-        return response()->json($reclamations, 200);
+{
+    $etudiant = $request->user()->etudiant;
+    if (!$etudiant) {
+        return response()->json([], 200);
     }
+    $reclamations = Reclamation::with(['note.matiere'])
+        ->where('etudiant_id', $etudiant->id)
+        ->get();
+    return response()->json($reclamations, 200);
+}
 }
