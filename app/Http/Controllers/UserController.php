@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Enseignant;
 use App\Models\Etudiant;
 use App\Models\Inscription;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -75,7 +77,45 @@ class UserController extends Controller
         if (! $user) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
-        $user->delete();
+
+        DB::beginTransaction();
+        try {
+            // Supprimer les données liées selon le rôle
+            if ($user->role === 'etudiant') {
+                $etudiant = $user->etudiant;
+                if ($etudiant) {
+                    // Supprimer inscriptions, notes, bulletins liés
+                    foreach ($etudiant->inscription ?? [] as $insc) {
+                        $insc->delete();
+                    }
+                    $etudiant->delete();
+                }
+            } elseif ($user->role === 'enseignant') {
+                $enseignant = $user->enseignant;
+                if ($enseignant) {
+                    // Détacher les modules affectés
+                    $enseignant->matieres()->detach();
+                    $enseignant->delete();
+                }
+            } elseif ($user->role === 'chef_departement') {
+                $user->chefDepartement?->delete();
+            } elseif ($user->role === 'scolarite') {
+                DB::table('agent_service_examens')->where('user_id', $user->id)->delete();
+            } elseif ($user->role === 'comptable') {
+                DB::table('comptables')->where('user_id', $user->id)->delete();
+            } elseif ($user->role === 'parent') {
+                $user->parentEtudiant?->etudiants()->detach();
+                $user->parentEtudiant?->delete();
+            }
+
+            $user->tokens()->delete();
+            $user->delete();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Erreur lors de la suppression : ' . $e->getMessage()], 500);
+        }
 
         return response()->json(['message' => 'Utilisateur supprimé avec succès'], 200);
     }
