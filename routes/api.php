@@ -19,6 +19,7 @@ use App\Http\Controllers\UeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ImportController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -90,6 +91,13 @@ Route::middleware(['auth:sanctum', 'check.role:admin'])->group(function () {
     Route::post('/annees-academiques', [AnneeAcademiqueController::class, 'store']);
 
     Route::delete('/journal', [HistoriqueModificationController::class, 'purger']);
+
+    // ── Import depuis Léa ──
+   Route::post('/import/etudiants',    [ImportController::class, 'etudiants']);
+   Route::post('/import/classes',      [ImportController::class, 'classes']);
+   Route::post('/import/modules',      [ImportController::class, 'modules']);
+   Route::post('/import/inscriptions', [ImportController::class, 'inscriptions']);
+   Route::post('/import/ue',           [ImportController::class, 'ue']);
 });
 
 // ── Groupe Enseignant ──

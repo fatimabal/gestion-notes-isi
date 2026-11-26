@@ -13,6 +13,8 @@ class ProfileController extends Controller
         $etudiant = $user->etudiant;
         $inscription = $etudiant?->inscription?->first();
         $chef = $user->chefDepartement;
+        $enseignant = $user->enseignant;
+        $parent = $user->parentEtudiant;
 
         return response()->json([
             'id'        => $user->id,
@@ -30,6 +32,15 @@ class ProfileController extends Controller
                 'filiere'        => $inscription?->classe?->filiere?->nom,
                 'diplome'        => $inscription?->classe?->filiere?->diplome,
                 'anneeAcademique'=> $inscription?->anneeAcademique,
+            ] : null,
+            'enseignant' => $enseignant ? [
+                'specialite' => $enseignant->specialite,
+                'grade'      => $enseignant->grade,
+            ] : null,
+            'parent_etudiant' => $parent ? [
+                'profession' => $parent->profession,
+                'adresse'    => $parent->adresse,
+                'lienParents'=> $parent->lienParents,
             ] : null,
             'chefDepartement' => $chef ? [
                 'specialite'  => $chef->specialite,
@@ -58,6 +69,9 @@ class ProfileController extends Controller
             'mandat'        => 'sometimes|nullable|string|max:255',
             'dateDebut'     => 'sometimes|nullable|string',
             'dateFin'       => 'sometimes|nullable|string',
+            'profession'    => 'sometimes|nullable|string|max:255',
+            'adresse'       => 'sometimes|nullable|string|max:255',
+            'lienParents'   => 'sometimes|nullable|string|max:255',
         ]);
 
         $user = $request->user();
@@ -87,6 +101,31 @@ class ProfileController extends Controller
             }
         }
 
+        // Mise à jour champs enseignant
+        $enseignant = $user->enseignant;
+        if ($enseignant) {
+            $champsEnseignant = [];
+            if ($request->has('specialite')) $champsEnseignant['specialite'] = $request->specialite;
+            if ($request->has('grade'))      $champsEnseignant['grade']      = $request->grade;
+
+            if (!empty($champsEnseignant)) {
+                $enseignant->update($champsEnseignant);
+            }
+        }
+
+        // Mise à jour champs parent
+        $parent = $user->parentEtudiant;
+        if ($parent) {
+            $champsParent = [];
+            if ($request->has('profession'))  $champsParent['profession']  = $request->profession;
+            if ($request->has('adresse'))     $champsParent['adresse']     = $request->adresse;
+            if ($request->has('lienParents')) $champsParent['lienParents'] = $request->lienParents;
+
+            if (!empty($champsParent)) {
+                $parent->update($champsParent);
+            }
+        }
+
         // Mise à jour champs chef de département
         $chef = $user->chefDepartement;
         if ($chef) {
@@ -102,6 +141,25 @@ class ProfileController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Profil mis à jour avec succès'], 200);
+        // Retourner le profil mis à jour
+        return response()->json([
+            'user' => [
+                'id'        => $user->id,
+                'nom'       => $user->nom,
+                'prenom'    => $user->prenom,
+                'email'     => $user->email,
+                'role'      => $user->role,
+                'enseignant' => $enseignant ? [
+                    'specialite' => $enseignant->specialite,
+                    'grade'      => $enseignant->grade,
+                ] : null,
+                'parent_etudiant' => $parent ? [
+                    'profession' => $parent->profession,
+                    'adresse'    => $parent->adresse,
+                    'lienParents'=> $parent->lienParents,
+                ] : null,
+            ],
+            'message' => 'Profil mis à jour avec succès',
+        ], 200);
     }
 }
